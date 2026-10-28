@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>View On Table · 3D AR Viewer</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Outfit:wght@600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Google model-viewer Web Component -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --red-950: #4a0508;
+      --red-900: #6c060b;
+      --red-800: #8a0a10;
+      --red-700: #a30d14;
+      --red-600: #c0121a;
+      --gold: #d9b25f;
+      --gold-lt: #f6e0a3;
+      --gold-dk: #a97d2c;
+      --gold-grad: linear-gradient(135deg, #f8e5ab 0%, #e0b862 45%, #b88a34 100%);
+      --red-grad: linear-gradient(135deg, #d9262e 0%, #a30d14 55%, #6c060b 100%);
+      --f-display: 'Playfair Display', serif;
+      --f-brand: 'Outfit', sans-serif;
+      --f-sans: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--f-sans);
+      background: #f2e2b4;
+      color: var(--red-900);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-family: var(--f-display);
+      font-size: clamp(28px, 6vw, 42px);
+      color: var(--red-900);
+      margin-bottom: 6px;
+    }
+
+    p.sub {
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      color: var(--red-800);
+    }
+
+    /* Dish Cards Grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
+      gap: 20px;
+      justify-content: center;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .dish-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.3));
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.85);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 30px rgba(108, 6, 11, 0.15);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dish-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 36px rgba(108, 6, 11, 0.22);
+    }
+
+    .card-thumb {
+      width: 100%;
+      height: 180px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: radial-gradient(circle at 30% 20%, #fff, #fbf3e4);
+      display: grid;
+      place-items: center;
+      font-size: 48px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.9);
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .dish-name {
+      font-family: var(--f-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--red-800);
+      margin-bottom: 6px;
+    }
+
+    .dish-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #5a2a2c;
+      margin-bottom: 14px;
+      flex-grow: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(163, 13, 20, 0.15);
+    }
+
+    .dish-price {
+      font-family: var(--f-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--red-700);
+    }
+
+    /* AR Action Button */
+    .ar-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--gold-grad);
+      color: var(--red-900);
+      border: 1px solid rgba(255, 250, 224, 0.85);
+      border-radius: 999px;
+      padding: 9px 16px;
+      min-height: 38px;
+      font: 700 11px var(--f-sans);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 6px 18px rgba(108, 6, 11, 0.2);
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .ar-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(108, 6, 11, 0.3);
+    }
+
+    .ar-btn:disabled {
+      opacity: 0.8;
+      cursor: progress;
+    }
+
+    .ar-btn svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.2;
+    }
+
+    .btn-spin {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(108, 6, 11, 0.25);
+      border-top-color: var(--red-900);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Hidden Native model-viewer Controls */
+    model-viewer::part(default-ar-button),
+    model-viewer::part(default-exit-webxr-ar-button) {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* Fixed Fullscreen AR Background Viewer */
+    #global-ar-viewer {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      opacity: 0;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    #global-ar-viewer.ar-active {
+      z-index: 9999;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* In-AR HUD Overlay */
+    .ar-hud {
+      display: none;
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10000;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: max(env(safe-area-inset-top), 16px) 16px max(env(safe-area-inset-bottom), 22px);
+    }
+
+    model-viewer[ar-status="session-started"] .ar-hud,
+    model-viewer[ar-status="object-placed"] .ar-hud {
+      display: flex;
+    }
+
+    .ar-hud-top {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .ar-exit-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(20, 4, 5, 0.85);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .ar-exit-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+    }
+
+    /* In-AR Side Navigation Arrows */
+    .ar-side-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      pointer-events: auto;
+      z-index: 5;
+      background: rgba(20, 4, 5, 0.85);
+      border: 1.5px solid var(--gold-lt);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .ar-side-prev { left: 12px; }
+    .ar-side-next { right: 12px; }
+    .ar-side-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--gold-lt);
+      fill: none;
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* In-AR Carousel & Bottom Bar */
+    .ar-hud-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      pointer-events: auto;
+    }
+
+    .ar-carousel {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 4px;
+      scroll-snap-type: x mandatory;
+    }
+    .ar-carousel::-webkit-scrollbar { display: none; }
+
+    .ar-carousel-item {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 5px;
+      border-radius: 999px;
+      background: rgba(20, 4, 5, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .ar-carousel-item.active {
+      background: linear-gradient(135deg, rgba(163, 13, 20, 0.95), rgba(74, 5, 8, 0.95));
+      border-color: var(--gold-lt);
+      box-shadow: 0 0 0 2px rgba(217, 178, 95, 0.4);
+    }
+
+    .ar-c-thumb {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+    }
+    .ar-c-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .ar-c-meta { display: flex; flex-direction: column; text-align: left; }
+    .ar-c-name { font: 600 12px var(--f-sans); color: #fff; }
+    .ar-c-price { font: 700 11px var(--f-sans); color: var(--gold-lt); }
+
+    .ar-bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 8px 20px;
+      border-radius: 999px;
+      background: rgba(20, 4, 5, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .ar-shutter-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 4px solid #fff;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 3px;
+      cursor: pointer;
+    }
+    .ar-shutter-btn::after {
+      content: '';
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--gold-grad);
+    }
+
+    /* Flash & Snapshot Overlay */
+    .ar-flash {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10001;
+      transition: opacity 0.25s ease;
+    }
+    .ar-flash.active { opacity: 0.85; }
+
+    .capture-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 11000;
+      background: rgba(15, 2, 4, 0.85);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .capture-modal.open { display: flex; }
+    .capture-box {
+      background: #fff8ea;
+      border-radius: 24px;
+      padding: 16px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      border: 2px solid var(--gold);
+    }
+    .capture-box img {
+      width: 100%;
+      max-height: 60vh;
+      border-radius: 16px;
+      object-fit: contain;
+      background: #1d0507;
+    }
+    .capture-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Interactive 3D AR Menu</h1>
+    <p class="sub">View real-scale portions directly on your table before dining</p>
+  </header>
+
+  <!-- Dishes Grid -->
+  <main class="menu-grid" id="dishes-container"></main>
+
+  <!-- Global Fullscreen WebXR / AR Viewer Component -->
+  <model-viewer
+    id="global-ar-viewer"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-placement="floor"
+    ar-scale="fixed"
+    camera-controls
+    touch-action="pan-y"
+    shadow-intensity="1"
+    shadow-softness="0.9"
+    environment-image="neutral"
+    exposure="1.05"
+    interaction-prompt="none"
+  >
+    <button slot="ar-button" style="display:none;"></button>
+    <button slot="exit-webxr-ar-button" style="display:none;"></button>
+
+    <!-- AR In-Camera HUD UI -->
+    <div class="ar-hud">
+      <div class="ar-hud-top">
+        <button type="button" class="ar-exit-btn" id="ar-close-btn" aria-label="Exit AR">
+          <svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg>
+        </button>
+      </div>
+
+      <button type="button" class="ar-side-btn ar-side-prev" id="ar-side-prev" aria-label="Previous dish">
+        <svg viewBox="0 0 24 24"><polyline points="15 5 8 12 15 19"/></svg>
+      </button>
+      <button type="button" class="ar-side-btn ar-side-next" id="ar-side-next" aria-label="Next dish">
+        <svg viewBox="0 0 24 24"><polyline points="9 5 16 12 9 19"/></svg>
+      </button>
+
+      <div class="ar-hud-bottom">
+        <div class="ar-carousel" id="ar-carousel"></div>
+        <div class="ar-bottom-bar">
+          <button type="button" class="ar-shutter-btn" id="ar-shutter-btn" aria-label="Capture Photo"></button>
+        </div>
+      </div>
+    </div>
+  </model-viewer>
+
+  <div class="ar-flash" id="ar-flash"></div>
+
+  <!-- Snapshot Modal -->
+  <div class="capture-modal" id="capture-modal">
+    <div class="capture-box">
+      <img id="capture-preview-img" src="" alt="Captured Dish" />
+      <div class="capture-actions">
+        <a id="capture-download-btn" class="ar-btn" download="AR-Dish.png">⬇ Save Photo</a>
+        <button type="button" class="ar-btn" id="capture-close-btn" style="background:#fff;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ───────────── CONFIGURATION & ASSETS ───────────── */
+    const ASSETS_BASE = '3d-model';
+    
+    // Dish catalogue data
+    const DISHES = [
+      {
+        id: 'fried-calamari',
+        name: 'Fried Calamari',
+        desc: 'Crispy golden calamari rings served with house dip.',
+        price: 420,
+        emoji: '🦑',
+        folder: 'Fried-Calamari',
+        file: 'Fried-Calamari',
+        scale: 0.75
+      },
+      {
+        id: 'cheesy-green-lasagne',
+        name: 'Cheesy Green Lasagne',
+        desc: 'Spinach pasta layered with creamy bechamel, ricotta & marinara.',
+        price: 540,
+        emoji: '🧀',
+        folder: 'Cheesy-Green-Lasagne',
+        file: 'Cheesy-Green-Lasagne',
+        scale: 1.0
+      },
+      {
+        id: 'pinocchio-tiramisu',
+        name: 'Pinocchio Tiramisu',
+        desc: 'Traditional coffee-soaked savoiardi with mascarpone cream.',
+        price: 360,
+        emoji: '🍰',
+        folder: 'Pinocchio-Tiramisu',
+        file: 'Pinocchio-Tiramisu',
+        scale: 1.0
+      },
+      {
+        id: 'pistachio-sauce-bigne-with-ricotta',
+        name: 'Pistachio Sauce Bigne',
+        desc: 'Delicate pastry filled with ricotta and drenched in Sicilian pistachio sauce.',
+        price: 390,
+        emoji: '🍮',
+        folder: 'Pistachio-Sauce-Bigne-with-Ricotta',
+        file: 'Pistachio-Sauce-Bigne-with-Ricotta',
+        scale: 0.75
+      }
+    ];
+
+    // Compute model asset paths
+    const dishes = DISHES.map(d => ({
+      ...d,
+      glbPath: `${ASSETS_BASE}/${d.folder}/${d.file}.glb`,
+      usdzPath: `${ASSETS_BASE}/${d.folder}/${d.file}.usdz`,
+      posterPath: `${ASSETS_BASE}/${d.folder}/${d.file}.png`
+    }));
+
+    const globalAR = document.getElementById('global-ar-viewer');
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    let currentARDish = null;
+    let lastCapturedDataUrl = '';
+
+    const SVG_CUBE = `<svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`;
+
+    /* Render Menu Cards */
+    function renderGrid() {
+      const container = document.getElementById('dishes-container');
+      container.innerHTML = dishes.map(d => `
+        <article class="dish-card">
+          <div class="card-thumb">
+            <img src="${d.posterPath}" alt="${d.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <span style="display:none">${d.emoji}</span>
+          </div>
+          <h2 class="dish-name">${d.name}</h2>
+          <p class="dish-desc">${d.desc}</p>
+          <div class="card-footer">
+            <span class="dish-price">₹${d.price}</span>
+            <button type="button" class="ar-btn" data-id="${d.id}">
+              ${SVG_CUBE} View On Table
+            </button>
+          </div>
+        </article>
+      `).join('');
+
+      container.querySelectorAll('.ar-btn').forEach(btn => {
+        btn.addEventListener('click', () => launchDirectAR(btn.dataset.id, btn));
+      });
+    }
+
+    /* ───────────── AR LAUNCH LOGIC ───────────── */
+    function applyARSize(d) {
+      if (!d) return;
+      const s = Number(d.scale || 0.25).toFixed(4);
+      globalAR.setAttribute('scale', `${s} ${s} ${s}`);
+      globalAR.setAttribute('ar-placement', 'floor');
+      globalAR.setAttribute('ar-scale', 'fixed');
+    }
+
+    function ensureARModel(d) {
+      return new Promise((resolve, reject) => {
+        if (globalAR.getAttribute('src') === d.glbPath && globalAR.loaded) return resolve();
+        const ok = () => { cleanup(); resolve(); };
+        const bad = () => { cleanup(); reject(new Error('Model loading failed')); };
+        const cleanup = () => {
+          globalAR.removeEventListener('load', ok);
+          globalAR.removeEventListener('error', bad);
+        };
+        globalAR.addEventListener('load', ok);
+        globalAR.addEventListener('error', bad);
+        if (globalAR.getAttribute('src') !== d.glbPath) {
+          globalAR.setAttribute('src', d.glbPath);
+        }
+      });
+    }
+
+    function renderARCarousel() {
+      const wrap = document.getElementById('ar-carousel');
+      wrap.innerHTML = dishes.map(d => {
+        const isActive = currentARDish && currentARDish.id === d.id;
+        return `
+          <button type="button" class="ar-carousel-item${isActive ? ' active' : ''}" data-ar-id="${d.id}">
+            <span class="ar-c-thumb">
+              <img src="${d.posterPath}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+              <span style="display:none">${d.emoji}</span>
+            </span>
+            <span class="ar-c-meta">
+              <span class="ar-c-name">${d.name}</span>
+              <span class="ar-c-price">₹${d.price}</span>
+            </span>
+          </button>
+        `;
+      }).join('');
+
+      wrap.querySelectorAll('.ar-carousel-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          switchARDish(btn.dataset.arId);
+        });
+      });
+    }
+
+    function switchARDish(id) {
+      const d = dishes.find(x => x.id === id);
+      if (!d) return;
+      currentARDish = d;
+      applyARSize(d);
+
+      if (d.usdzPath) globalAR.setAttribute('ios-src', d.usdzPath);
+      if (globalAR.getAttribute('src') !== d.glbPath) globalAR.setAttribute('src', d.glbPath);
+
+      document.querySelectorAll('.ar-carousel-item').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.arId === d.id);
+      });
+    }
+
+    function stepARDish(dir) {
+      const idx = dishes.findIndex(x => currentARDish && x.id === currentARDish.id);
+      const nextIdx = (idx + dir + dishes.length) % dishes.length;
+      switchARDish(dishes[nextIdx].id);
+    }
+
+    async function launchDirectAR(id, triggerBtn) {
+      const d = dishes.find(x => x.id === id);
+      if (!d) return;
+      currentARDish = d;
+
+      // iOS Quick Look Fallback via native anchor
+      if (isIOS && d.usdzPath) {
+        const a = document.createElement('a');
+        a.setAttribute('rel', 'ar');
+        const absUsdz = new URL(d.usdzPath, location.href).href;
+        a.setAttribute('href', `${absUsdz}#allowsContentScaling=0&canonicalWebPageURL=${encodeURIComponent(location.href)}`);
+        const img = document.createElement('img');
+        a.appendChild(img);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        return;
+      }
+
+      // Android WebXR launch via model-viewer
+      if (triggerBtn) {
+        triggerBtn.disabled = true;
+        triggerBtn.innerHTML = `<span class="btn-spin"></span> Loading…`;
+      }
+
+      applyARSize(d);
+      renderARCarousel();
+
+      try {
+        await ensureARModel(d);
+        if (triggerBtn) {
+          triggerBtn.disabled = false;
+          triggerBtn.innerHTML = `${SVG_CUBE} View On Table`;
+        }
+        globalAR.activateAR();
+      } catch (err) {
+        console.error('AR Launch error:', err);
+        if (triggerBtn) {
+          triggerBtn.disabled = false;
+          triggerBtn.innerHTML = `${SVG_CUBE} View On Table`;
+        }
+        alert('Could not launch AR on this device/browser.');
+      }
+    }
+
+    /* ───────────── AR HUD EVENTS & SNAPSHOT ───────────── */
+    document.getElementById('ar-side-prev').addEventListener('click', (e) => { e.stopPropagation(); stepARDish(-1); });
+    document.getElementById('ar-side-next').addEventListener('click', (e) => { e.stopPropagation(); stepARDish(1); });
+
+    document.getElementById('ar-close-btn').addEventListener('click', async () => {
+      try { globalAR.querySelector('[slot="exit-webxr-ar-button"]')?.click(); } catch(e){}
+      globalAR.classList.remove('ar-active');
+    });
+
+    globalAR.addEventListener('ar-status', (e) => {
+      const st = e.detail.status;
+      if (st === 'session-started' || st === 'object-placed') {
+        globalAR.classList.add('ar-active');
+        applyARSize(currentARDish);
+      } else if (st === 'not-presenting' || st === 'failed') {
+        globalAR.classList.remove('ar-active');
+      }
+    });
+
+    document.getElementById('ar-shutter-btn').addEventListener('click', async () => {
+      const flash = document.getElementById('ar-flash');
+      flash.classList.add('active');
+      setTimeout(() => flash.classList.remove('active'), 220);
+
+      try {
+        const blob = await globalAR.toBlob({ idealAspect: true });
+        if (lastCapturedDataUrl) URL.revokeObjectURL(lastCapturedDataUrl);
+        lastCapturedDataUrl = URL.createObjectURL(blob);
+
+        document.getElementById('capture-preview-img').src = lastCapturedDataUrl;
+        document.getElementById('capture-download-btn').href = lastCapturedDataUrl;
+        document.getElementById('capture-download-btn').download = `${currentARDish?.name || 'Dish'}-AR.png`;
+        document.getElementById('capture-modal').classList.add('open');
+      } catch (err) {
+        console.warn('Capture failed:', err);
+      }
+    });
+
+    document.getElementById('capture-close-btn').addEventListener('click', () => {
+      document.getElementById('capture-modal').classList.remove('open');
+    });
+
+    // Start
+    renderGrid();
+  </script>
+</body>
+</html>
