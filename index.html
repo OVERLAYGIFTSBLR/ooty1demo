@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <meta http-equiv="Permissions-Policy" content="camera=*">
-<title>AR Menu – 3D Dish View</title>
+<title>AR Menu – 3D Dish Try-On</title>
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -21,16 +20,21 @@
   --gold-border:rgba(201,168,76,.28);
   --ink:#0A0A0A;
   --cream:#F5F0E8;
-  --glass-dark:rgba(6,5,4,.82);
+  --glass-dark:rgba(6,5,4,.78);
   --radius-pill:100px;
   --text-main:#FFD76A;
   --text-sub:#FFFFFF;
 }
 html,body{
-  width:100%;height:100%;font-family:'Jost',sans-serif;background:#060504;
-  overflow:hidden;overscroll-behavior:none;position:fixed;
-  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
-  -webkit-text-size-adjust:100%;
+  width:100%;height:100%;
+  font-family:'Jost',sans-serif;
+  background:#060504;
+  overflow:hidden;
+  overscroll-behavior:none;
+  position:fixed;
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  user-select:none;
 }
 .a-enter-vr-button{display:none!important}
 a-scene{position:fixed!important;top:0!important;left:0!important;width:100%!important;height:100%!important;z-index:0!important}
@@ -41,96 +45,150 @@ video{position:fixed!important;top:0!important;left:0!important;width:100%!impor
 #startScreen{position:fixed;inset:0;background:#060504;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:40px 32px;transition:opacity .4s}
 .start-inner{display:flex;flex-direction:column;align-items:center;max-width:320px;width:100%}
 img.start-logo{width:130px;height:130px;object-fit:contain;margin-bottom:36px;filter:brightness(0) invert(1) sepia(1) saturate(.6)}
-#startBtn,#retryBtn{
-  position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:10px;
-  padding:16px 36px;font-family:'Jost',sans-serif;font-size:13px;font-weight:700;
-  letter-spacing:.18em;text-transform:uppercase;color:#1a1305;
+#startBtn{
+  padding:18px 42px;
+  font-family:'Jost',sans-serif;font-size:13px;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:#1a1305;
   background:linear-gradient(135deg,var(--gold-light),var(--gold));
-  border:1px solid var(--gold-light);border-radius:var(--radius-pill);
-  box-shadow:0 0 0 4px rgba(201,168,76,.12),0 10px 30px rgba(201,168,76,.28);
-  cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  border:1px solid var(--gold-light);
+  border-radius:var(--radius-pill);
+  cursor:pointer;
+  box-shadow:0 10px 30px rgba(201,168,76,.28);
 }
-#startBtn:active{transform:scale(.97)}
 
-/* OVERLAYS */
+/* LOADING & ERROR */
 #loadingOverlay,#errorOverlay{position:fixed;inset:0;background:#060504;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:998;gap:20px;padding:36px;text-align:center}
 #loadingOverlay.show,#errorOverlay.show{display:flex}
-.loading-ring{width:50px;height:50px;border:2px solid rgba(201,168,76,.15);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
-#loadingStatus{color:rgba(245,240,232,.6);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.loading-ring{width:50px;height:50px;border:1.5px solid rgba(201,168,76,.15);border-top-color:var(--gold);border-radius:50%;animation:spin 1.2s linear infinite}
+#loadingStatus{color:rgba(245,240,232,.4);font-size:11px;letter-spacing:.2em;text-transform:uppercase}
 @keyframes spin{to{transform:rotate(360deg)}}
-#errorOverlay h2{color:var(--gold-light);font-size:20px;font-weight:600;margin-bottom:8px}
-#errorOverlay p{color:rgba(245,240,232,.6);font-size:13px;line-height:1.7;max-width:300px;margin-bottom:12px}
+#modelLoader{position:fixed;top:20px;right:20px;background:var(--glass-dark);border:1px solid var(--gold-border);border-radius:var(--radius-pill);padding:6px 14px;color:var(--gold-light);font-size:10px;letter-spacing:.12em;text-transform:uppercase;z-index:300;display:none;align-items:center;gap:8px}
+#modelLoader.show{display:flex}
+.mini-spin{width:11px;height:11px;border:1.5px solid rgba(201,168,76,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
 
-/* MARKED ITEM 1: TOP-LEFT LOGO */
+/* 1. LOGO (TOP LEFT) */
 #logo{
-  position:fixed;top:calc(16px + env(safe-area-inset-top,0px));left:16px;
-  width:64px;height:64px;object-fit:contain;z-index:200;
-  opacity:0;pointer-events:none;transition:opacity .4s ease;
-  filter:drop-shadow(0 2px 8px rgba(0,0,0,0.7));
+  position:fixed;
+  top:16px;
+  left:16px;
+  width:68px;
+  height:auto;
+  z-index:200;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .5s;
+  filter:brightness(0) invert(1) sepia(1) saturate(.5);
 }
 
-/* MARKED ITEM 2: ACTION BAR */
+/* SCAN HINT */
+#scanHint{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:14px;pointer-events:none;z-index:10;opacity:0;transition:opacity .5s}
+.scan-frame{position:relative;width:180px;height:180px;border:1px dashed rgba(201,168,76,.35);border-radius:10px}
+.scan-line{position:absolute;left:8px;right:8px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:scanLine 2.4s ease-in-out infinite}
+@keyframes scanLine{0%,100%{top:8px;opacity:0}10%,90%{opacity:1}50%{top:calc(100% - 8px)}}
+#scanHint p{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:rgba(245,240,232,.5)}
+
+/* 2. ACTION BAR (BOTTOM BUTTONS) */
 #actionBar{
-  position:fixed;left:0;right:0;width:100%;
-  bottom:calc(110px + env(safe-area-inset-bottom,0px));
-  display:flex;gap:6px;padding:0 10px;
-  max-width:440px;margin:0 auto;z-index:170;
-  opacity:0;pointer-events:none;transition:opacity .4s ease;
+  position:fixed;
+  left:0;right:0;
+  bottom:calc(114px + env(safe-area-inset-bottom,0px));
+  display:flex;
+  gap:8px;
+  padding:0 12px;
+  max-width:440px;
+  margin:0 auto;
+  z-index:170;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .5s;
 }
 #actionBar a{
-  flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;
-  border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  text-decoration:none;border:1px solid var(--gold-border);
-  background:var(--glass-dark);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  color:var(--gold-light);-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  flex:1;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:100px;
+  font-size:11px;
+  letter-spacing:.12em;
+  font-weight:600;
+  text-transform:uppercase;
+  text-decoration:none;
+  border:1px solid var(--gold-border);
+  background:var(--glass-dark);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  color:var(--gold-light);
+  -webkit-tap-highlight-color:transparent;
 }
 #actionBar a.primary{
-  flex:1.4;background:linear-gradient(135deg,var(--gold-light),var(--gold));
-  color:#1a1305;border-color:var(--gold);
+  flex:1.4;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  color:#1a1305;
+  border-color:var(--gold);
 }
 
-/* MARKED ITEM 3: BOTTOM DISH CAROUSEL */
+/* 3. DISH CAROUSEL (BOTTOM THUMBNAILS) */
 #dishCarousel{
-  position:fixed;left:0;right:0;bottom:0;width:100%;
-  display:flex;justify-content:flex-start;gap:8px;overflow-x:auto;
-  padding:10px 12px calc(14px + env(safe-area-inset-bottom,0px));
-  background:var(--glass-dark);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-top:1px solid var(--gold-border);border-radius:22px 22px 0 0;
-  scrollbar-width:none;-webkit-overflow-scrolling:touch;z-index:150;
-  opacity:0;pointer-events:none;transition:opacity .4s ease;
+  position:fixed;
+  left:0;right:0;bottom:0;
+  display:flex;
+  justify-content:flex-start;
+  gap:8px;
+  overflow-x:auto;
+  width:100%;
+  padding:10px 14px calc(14px + env(safe-area-inset-bottom,0px));
+  background:var(--glass-dark);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--gold-border);
+  border-radius:24px 24px 0 0;
+  scrollbar-width:none;
+  z-index:150;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .5s;
 }
 #dishCarousel::-webkit-scrollbar{display:none}
 .dish-thumb{
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  cursor:pointer;flex:0 0 auto;min-width:68px;padding:6px 4px;
-  border-radius:14px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;
-  transition:background .2s ease;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  flex-shrink:0;
+  padding:6px 8px;
+  border-radius:40px;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .25s;
 }
 .dish-thumb.active{background:var(--gold-dim)}
-.thumb-img-wrap{width:48px;height:48px}
+.thumb-img-wrap{width:52px;height:52px}
 .dish-thumb img{
-  width:48px;height:48px;object-fit:cover;border-radius:50%;
-  border:1.5px solid rgba(201,168,76,.25);transition:.2s;pointer-events:none;display:block;
+  width:52px;height:52px;
+  object-fit:cover;
+  border-radius:50%;
+  border:1.5px solid rgba(201,168,76,.2);
+  transition:.25s;
+  display:block;
 }
 .dish-thumb.active img{border-color:var(--gold);transform:scale(1.08)}
 .dish-thumb span{
-  font-size:9px;letter-spacing:.04em;color:var(--text-sub);
-  font-weight:700;text-align:center;max-width:64px;line-height:1.2;
+  font-size:8.5px;
+  letter-spacing:.05em;
+  color:var(--text-sub);
+  font-weight:700;
+  text-align:center;
+  max-width:62px;
+  line-height:1.2;
   text-transform:uppercase;
 }
 .dish-thumb.active span{color:var(--text-main)}
 
-/* SCANNER TARGET HINT */
-#scanHint{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:14px;pointer-events:none;z-index:10;opacity:0;transition:opacity .4s}
-.scan-frame{position:relative;width:190px;height:190px;border:1.5px dashed rgba(201,168,76,.4);border-radius:12px}
-.scan-line{position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:scanLine 2.2s ease-in-out infinite}
-@keyframes scanLine{0%,100%{top:8px;opacity:0}10%,90%{opacity:1}50%{top:calc(100% - 10px)}}
-#scanHint p{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,240,232,.6)}
-
-/* FALLBACK 3D VIEWER (IOS & ANDROID FRIENDLY) */
-#fallback{position:fixed;inset:0;z-index:1000;display:none;flex-direction:column;background:radial-gradient(ellipse at 50% 35%,#1b1610,#060504 75%)}
-#fallback.show{display:flex}
-#fbViewer{display:block;flex:1;width:100%;height:100%;background:transparent}
+@media(max-width:390px){
+  .dish-thumb img,.thumb-img-wrap{width:46px;height:46px}
+}
 </style>
 </head>
 <body>
@@ -143,56 +201,53 @@ img.start-logo{width:130px;height:130px;object-fit:contain;margin-bottom:36px;fi
   </div>
 </div>
 
-<!-- LOADING / ERROR -->
-<div id="loadingOverlay"><div class="loading-ring"></div><p id="loadingStatus">Starting Camera...</p></div>
-<div id="errorOverlay">
-  <h2>Camera Access Required</h2>
-  <p>Allow camera permissions in browser settings to view 3D dishes on the menu card.</p>
-  <button id="retryBtn">Retry</button>
-</div>
+<!-- LOADING -->
+<div id="loadingOverlay"><div class="loading-ring"></div><p id="loadingStatus">Starting camera</p></div>
+<div id="modelLoader"><div class="mini-spin"></div><span>Loading 3D...</span></div>
 
-<!-- 1. MARKED TOP-LEFT LOGO -->
-<img src="logo1.png" id="logo" alt="Restaurant Logo">
+<!-- 1. TOP-LEFT LOGO -->
+<img src="logo1.png" id="logo" alt="Logo">
 
-<!-- 2. MARKED ACTION BAR -->
+<!-- SCAN GUIDE -->
+<div id="scanHint"><div class="scan-frame"><div class="scan-line"></div></div><p>Point at menu card</p></div>
+
+<!-- 2. ACTION BAR -->
 <div id="actionBar">
   <a data-a="reserve" class="primary" target="_blank" rel="noopener">Reserve Table</a>
   <a data-a="directions" target="_blank" rel="noopener">Directions</a>
   <a data-a="call">Call</a>
 </div>
 
-<!-- 3. MARKED DISH CAROUSEL -->
+<!-- 3. DISH CAROUSEL -->
 <div id="dishCarousel"></div>
 
-<!-- SCAN GUIDANCE -->
-<div id="scanHint"><div class="scan-frame"><div class="scan-line"></div></div><p>Point at menu card</p></div>
-
-<!-- FALLBACK 3D VIEWER FOR SAFARI / ANDROID AR -->
-<div id="fallback">
-  <model-viewer id="fbViewer" camera-controls auto-rotate shadow-intensity="1" exposure="1" interaction-prompt="none" ar ar-modes="webxr scene-viewer quick-look" ar-scale="auto"></model-viewer>
-</div>
-
-<!-- AR SCENE -->
+<!-- 3D MODEL AR SCENE -->
 <a-scene id="arScene" gltf-model="dracoDecoderPath: https://www.gstatic.com/draco/v1/decoders/"
   mindar-image="imageTargetSrc: ./targets/card.mind; filterMinCF: 0.1; filterBeta: 10; missTolerance: 10; warmupTolerance: 2; maxTrack: 1; uiLoading: no; uiError: no; uiScanning: no"
-  renderer="colorManagement: true; antialias: false; precision: mediump; physicallyCorrectLights: true"
+  renderer="colorManagement: true; antialias: false; logarithmicDepthBuffer: false; precision: mediump; physicallyCorrectLights: true"
   loading-screen="enabled: false" vr-mode-ui="enabled: false" xr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false" style="display:none;">
 
-  <a-light type="ambient" color="#ffffff" intensity="0.65"></a-light>
+  <a-assets timeout="30000">
+    <a-asset-item id="preload0" src="3d-model/almondcrustedcrispy/almondcrustedcrispy.glb"></a-asset-item>
+  </a-assets>
+
+  <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
   <a-light type="directional" color="#ffffff" intensity="1.0" position="1 3 2"></a-light>
   <a-light type="directional" color="#ffe9c0" intensity="0.5" position="-2 2 -1"></a-light>
+  <a-light type="directional" color="#cce8ff" intensity="0.3" position="0 -1 2"></a-light>
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
   <a-entity id="target1" mindar-image-target="targetIndex: 0">
     <a-entity id="spinner">
-      <a-entity id="modelEntity" position="0 0 0" rotation="0 0 0" scale="1 1 1"></a-entity>
+      <a-entity id="modelEntity" position="0 0 0" rotation="0 0 0" scale="1 1 1" gltf-model=""></a-entity>
     </a-entity>
   </a-entity>
 </a-scene>
 
 <script>
+/* RESTAURANT CONFIGURATION */
 const CONFIG = {
   name: 'Aurelia',
   phone: '+917019743880',
@@ -203,10 +258,10 @@ const CONFIG = {
 };
 
 const dishes = [
-  { name:"Almond Crusted Crispy", folder:"almondcrustedcrispy", model:"almondcrustedcrispy.glb", thumb:"almondcrustedcrispy.png", usdz:"almondcrustedcrispy.usdz", scale:"2 2 2", rotation:"90 90 90" },
-  { name:"Cheesy Quiche",         folder:"cheesyquiche",         model:"cheesyquiche.glb",         thumb:"cheesyquiche.png",         usdz:"cheesyquiche.usdz",         scale:"2 2 2", rotation:"90 90 90" },
-  { name:"Crispy Vegetable",      folder:"crispyvegetable",      model:"crispyvegetable.glb",      thumb:"crispyvegetable.png",      usdz:"crispyvegetable.usdz",      scale:"2 2 2", rotation:"90 90 90" },
-  { name:"Karamiso Ramen",        folder:"KaramisoRamen",        model:"KaramisoRamen.glb",        thumb:"karamisoramen.png",        usdz:"KaramisoRamen.usdz",        scale:"4 4 4", rotation:"90 90 90" },
+  { name:"Almond Crusted Crispy", folder:"almondcrustedcrispy", model:"almondcrustedcrispy.glb", thumb:"almondcrustedcrispy.png", scale:"2 2 2", rotation:"90 90 90" },
+  { name:"Cheesy Quiche",         folder:"cheesyquiche",         model:"cheesyquiche.glb",         thumb:"cheesyquiche.png",         scale:"2 2 2", rotation:"90 90 90" },
+  { name:"Crispy Vegetable",      folder:"crispyvegetable",      model:"crispyvegetable.glb",      thumb:"crispyvegetable.png",      scale:"2 2 2", rotation:"90 90 90" },
+  { name:"Karamiso Ramen",        folder:"KaramisoRamen",        model:"KaramisoRamen.glb",        thumb:"karamisoramen.png",        scale:"4 4 4", rotation:"90 90 90" },
   { name:"Shio Ramen",            folder:"ShioRamen",            model:"ShioRamen.glb",            thumb:"shioramen.png",            scale:"9 9 9", rotation:"90 90 90" },
   { name:"Shoyu Ramen",           folder:"ShoyuRamen",           model:"ShoyuRamen.glb",           thumb:"shoyuramen.png",           scale:"9 9 9", rotation:"90 90 90" },
   { name:"Tantanmen",             folder:"Tantanman",            model:"Tantanman.glb",            thumb:"tantanman.png",            scale:"1.5 1.5 1.5", rotation:"90 90 90" },
@@ -217,18 +272,20 @@ let currentIndex = -1, arStarted = false, markerFound = false;
 
 const $ = s => document.querySelector(s);
 const modelEntity = $('#modelEntity'),
-      carousel = $('#dishCarousel'),
-      logo = $('#logo'),
-      scanHint = $('#scanHint'),
+      carousel = $('#dishCarousel'), 
+      logo = $('#logo'), 
+      scanHint = $('#scanHint'), 
       target = $('#target1'),
-      arScene = $('#arScene'),
-      startScreen = $('#startScreen'),
+      arScene = $('#arScene'), 
+      startScreen = $('#startScreen'), 
       loadingOverlay = $('#loadingOverlay'),
-      loadingStatus = $('#loadingStatus'),
-      errorOverlay = $('#errorOverlay'),
+      loadingStatus = $('#loadingStatus'), 
+      modelLoader = $('#modelLoader'),
       spinner = $('#spinner');
 
-/* Populate Action Bar Links */
+const alwaysVisible = [carousel, logo, $('#actionBar')];
+
+/* Setup Action Buttons */
 const waMsg = encodeURIComponent(`Hi ${CONFIG.name}! I would like to reserve a table.`);
 const LINKS = {
   reserve: `https://wa.me/${CONFIG.whatsapp}?text=${waMsg}`,
@@ -236,131 +293,108 @@ const LINKS = {
   call: `tel:${CONFIG.phone}`
 };
 document.querySelectorAll('#actionBar a').forEach(a => {
-  if (LINKS[a.dataset.a]) a.href = LINKS[a.dataset.a];
+  a.href = LINKS[a.dataset.a];
 });
 
-/* Populate Carousel */
+/* Build Carousel */
 dishes.forEach((dish, i) => {
-  const item = document.createElement('div');
-  item.className = 'dish-thumb' + (i === 0 ? ' active' : '');
-  item.innerHTML = `
+  const t = document.createElement('div');
+  t.className = 'dish-thumb' + (i === 0 ? ' active' : '');
+  t.innerHTML = `
     <div class="thumb-img-wrap">
       <img src="3d-model/${dish.folder}/${dish.thumb}" onerror="this.style.visibility='hidden'" alt="${dish.name}" draggable="false">
     </div>
     <span>${dish.name}</span>
   `;
-  item.addEventListener('click', () => selectDish(i));
-  carousel.appendChild(item);
+  t.addEventListener('click', () => selectDish(i));
+  carousel.appendChild(t);
 });
+
+function applyModel(ent, dish) {
+  ent.removeAttribute('gltf-model');
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    ent.setAttribute('gltf-model', `3d-model/${dish.folder}/${dish.model}`);
+    ent.setAttribute('scale', dish.scale);
+    ent.setAttribute('rotation', dish.rotation);
+    ent.setAttribute('position', '0 0 0');
+  }));
+}
 
 function selectDish(index) {
   if (index === currentIndex) return;
   currentIndex = index;
   const dish = dishes[index];
 
-  // Update Model in A-Frame MindAR
-  modelEntity.removeAttribute('gltf-model');
-  requestAnimationFrame(() => {
-    modelEntity.setAttribute('gltf-model', `3d-model/${dish.folder}/${dish.model}`);
-    modelEntity.setAttribute('scale', dish.scale);
-    modelEntity.setAttribute('rotation', dish.rotation);
-  });
+  modelLoader.classList.add('show');
+  applyModel(modelEntity, dish);
 
-  // Highlight active thumb and center scroll
+  modelEntity.addEventListener('model-loaded', () => {
+    modelLoader.classList.remove('show');
+  }, { once: true });
+
   document.querySelectorAll('.dish-thumb').forEach((el, i) => el.classList.toggle('active', i === index));
-  const activeEl = document.querySelectorAll('.dish-thumb')[index];
-  if (activeEl) {
-    carousel.scrollTo({
-      left: activeEl.offsetLeft - carousel.clientWidth / 2 + activeEl.clientWidth / 2,
-      behavior: 'smooth'
-    });
+  const el = document.querySelectorAll('.dish-thumb')[index];
+  if (el) {
+    carousel.scrollTo({ left: el.offsetLeft - carousel.clientWidth / 2 + el.clientWidth / 2, behavior: 'smooth' });
   }
 }
 
-/* Smooth Rotation Loop */
+/* 3D Spin Animation Loop */
 let lastT = performance.now();
-function renderLoop() {
-  requestAnimationFrame(renderLoop);
+function animate() {
+  requestAnimationFrame(animate);
   const now = performance.now(), dt = Math.min((now - lastT) / 1000, 0.1);
   lastT = now;
-  if (markerFound && spinner && spinner.object3D) {
+
+  if (markerFound && CONFIG.spinDegPerSec > 0) {
     spinner.object3D.rotation[CONFIG.spinAxis] += (CONFIG.spinDegPerSec * Math.PI / 180) * dt;
   }
 }
-renderLoop();
+animate();
 
-/* Camera & AR Launch (iPhone Safari & Android Chrome compatible) */
+/* AR Lifecycle & Events */
 async function startAR() {
   if (arStarted) return;
   startScreen.style.opacity = '0';
   setTimeout(() => startScreen.style.display = 'none', 400);
   loadingOverlay.classList.add('show');
-  loadingStatus.textContent = 'Requesting Camera...';
 
   try {
-    // Standard mobile back-facing camera constraints
-    const constraints = {
-      audio: false,
-      video: {
-        facingMode: { ideal: 'environment' },
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    };
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    stream.getTracks().forEach(t => t.stop()); // release camera check so MindAR can bind
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+    stream.getTracks().forEach(t => t.stop());
 
-    loadingStatus.textContent = 'Initializing AR...';
+    loadingStatus.textContent = 'Initialising AR';
     arScene.style.display = 'block';
 
     const onReady = () => {
       loadingOverlay.classList.remove('show');
       scanHint.style.opacity = '1';
       arStarted = true;
-
-      // Show ONLY marked UI items
-      logo.style.opacity = '1';
-      logo.style.pointerEvents = 'auto';
-      $('#actionBar').style.opacity = '1';
-      $('#actionBar').style.pointerEvents = 'auto';
-      carousel.style.opacity = '1';
-      carousel.style.pointerEvents = 'auto';
-
+      alwaysVisible.forEach(el => { el.style.opacity = '1'; el.style.pointerEvents = 'auto'; });
       selectDish(0);
-
-      // Force video element to stay inline for iOS Safari
-      const v = document.querySelector('video');
-      if (v) {
-        v.setAttribute('playsinline', '');
-        v.setAttribute('webkit-playsinline', '');
-      }
     };
 
-    arScene.addEventListener('arReady', onReady, { once: true });
     arScene.addEventListener('loaded', onReady, { once: true });
-    setTimeout(onReady, 3500); // safety fallback
-
+    arScene.addEventListener('arReady', onReady, { once: true });
+    setTimeout(onReady, 3000);
   } catch (err) {
-    console.error('AR / Camera Error:', err);
     loadingOverlay.classList.remove('show');
-    errorOverlay.classList.add('show');
+    alert('Please allow camera access to view the dishes in AR.');
   }
 }
 
 $('#startBtn').addEventListener('click', startAR);
-$('#startBtn').addEventListener('touchend', e => { e.preventDefault(); startAR(); });
-$('#retryBtn').addEventListener('click', () => location.reload());
 
 target.addEventListener('targetFound', () => {
   markerFound = true;
   scanHint.style.opacity = '0';
 });
+
 target.addEventListener('targetLost', () => {
   markerFound = false;
   scanHint.style.opacity = '1';
 });
 
-// Prevent long-press contextual menus on mobile
 document.addEventListener('contextmenu', e => e.preventDefault());
 </script>
 </body>
