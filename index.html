@@ -24,9 +24,18 @@ video{position:fixed!important;top:0!important;left:0!important;width:100%!impor
 /* START */
 #startScreen{position:fixed;inset:0;background:#060504;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:40px 32px;transition:opacity .4s}
 .start-inner{display:flex;flex-direction:column;align-items:center;max-width:320px;width:100%}
+.start-ornament{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.start-ornament-line{width:40px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.start-ornament-line.right{background:linear-gradient(90deg,var(--gold),transparent)}
+.start-ornament-diamond{width:6px;height:6px;background:var(--gold);transform:rotate(45deg)}
 img.start-logo{width:140px;height:140px;object-fit:contain;margin-bottom:44px;filter:brightness(0) invert(1) sepia(1) saturate(.6)}
-#startBtn,#retryBtn{font-family:'Jost',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-#retryBtn{margin-top:8px;padding:12px 28px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--gold-border);border-radius:var(--radius-pill);background:transparent;color:var(--gold-light)}
+.start-eyebrow{font-size:10px;letter-spacing:.22em;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+#startScreen h1{font-family:'Cormorant Garamond',serif;color:var(--cream);font-size:36px;font-weight:300;line-height:1.15;text-align:center;margin-bottom:20px}
+#startScreen h1 em{font-style:italic;color:var(--gold-light)}
+#startScreen p.desc{color:rgba(245,240,232,.42);font-size:13px;font-weight:300;text-align:center;line-height:1.75;margin-bottom:36px}
+#startBtn,#retryBtn{padding:16px 42px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--gold-border);border-radius:var(--radius-pill);background:transparent;color:var(--gold-light);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#startBtn:active{background:var(--gold);color:var(--ink)}
+#retryBtn{margin-top:8px;padding:12px 28px;font-size:11px}
 
 /* LOADING / ERROR */
 #loadingOverlay,#errorOverlay{position:fixed;inset:0;background:#060504;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:998;gap:20px;padding:36px;text-align:center}
@@ -48,16 +57,15 @@ img.start-logo{width:140px;height:140px;object-fit:contain;margin-bottom:44px;fi
 
 /* LOGO / CAROUSEL */
 #logo{position:fixed;top:14px;left:14px;width:60px;z-index:200;opacity:0;pointer-events:none;transition:opacity .5s;filter:brightness(0) invert(1) sepia(1) saturate(.5)}
-#dishCarousel{position:fixed;display:flex;overflow-x:auto;background:var(--glass-dark);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--gold-border);scrollbar-width:none;z-index:150;opacity:0;pointer-events:none;transition:opacity .5s;left:0;right:0;bottom:0;width:100%;justify-content:space-around;gap:4px;padding:10px 6px calc(10px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;border-left:0;border-right:0;border-bottom:0}
+#dishCarousel{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:6px;overflow-x:auto;max-width:calc(100vw - 20px);padding:10px 16px;background:var(--glass-dark);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--gold-border);border-radius:60px;scrollbar-width:none;z-index:150;opacity:0;pointer-events:none;transition:opacity .5s}
 #dishCarousel::-webkit-scrollbar{display:none}
-.dish-thumb{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex:1 0 auto;padding:4px 6px;border-radius:50px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .25s}
+.dish-thumb{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;flex-shrink:0;padding:4px 6px;border-radius:50px;-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .25s}
 .dish-thumb.active{background:var(--gold-dim)}
 .thumb-img-wrap{width:50px;height:50px}
 .dish-thumb img{width:50px;height:50px;object-fit:cover;border-radius:50%;border:1.5px solid rgba(201,168,76,.15);transition:.25s;pointer-events:none;display:block}
 .dish-thumb.active img{border-color:var(--gold);transform:scale(1.06)}
 .dish-thumb span{font-size:8.5px;letter-spacing:.05em;color:var(--text-sub);font-weight:700;text-align:center;max-width:58px;line-height:1.3;text-transform:uppercase}
 .dish-thumb.active span{color:var(--text-main)}
-@media(max-width:390px){.dish-thumb img,.thumb-img-wrap{width:42px;height:42px}}
 
 /* SCAN HINT */
 #scanHint{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:16px;pointer-events:none;z-index:10;opacity:0;transition:opacity .5s}
@@ -75,30 +83,78 @@ img.start-logo{width:140px;height:140px;object-fit:contain;margin-bottom:44px;fi
 .swipe-arrow-icon{width:44px;height:44px;border:1px solid var(--gold-border);border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--glass-dark)}
 .swipe-arrow-icon svg{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .swipe-arrow span{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(245,240,232,.4)}
+#dishCounter{display:none!important}
 #swipeFlash{position:fixed;inset:0;pointer-events:none;z-index:99;opacity:0}
 #swipeFlash.left{background:linear-gradient(to right,rgba(201,168,76,.06),transparent)}
 #swipeFlash.right{background:linear-gradient(to left,rgba(201,168,76,.06),transparent)}
 #swipeFlash.flash{animation:flashFade .35s ease-out forwards}
 @keyframes flashFade{0%{opacity:1}100%{opacity:0}}
 
+/* HUD & OVERLAYS - DISABLED AS REQUESTED */
+#hudCard, #snapBtn, #soundBtn, #shareSheet, #recPill, #shareNow {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+@supports(padding-bottom:env(safe-area-inset-bottom)){
+#dishCarousel{bottom:calc(20px + env(safe-area-inset-bottom))}}
+@media(max-width:390px){.dish-thumb img,.thumb-img-wrap{width:42px;height:42px}#startScreen h1{font-size:30px}}
+
 /* UI CONTROLS */
-#actionBar{position:fixed;left:0;right:0;display:flex;gap:6px;padding:0 6px;bottom:calc(112px + env(safe-area-inset-bottom,0px));z-index:170;opacity:0;pointer-events:none;transition:opacity .5s}
+#actionBar{position:fixed;left:50%;bottom:132px;transform:translateX(-50%);display:flex;gap:8px;width:calc(100vw - 28px);max-width:420px;z-index:170;opacity:0;pointer-events:none;transition:opacity .5s}
 #actionBar a{flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:100px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border:1px solid var(--gold-border);background:var(--glass-dark);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(--gold-light);-webkit-tap-highlight-color:transparent}
 #actionBar a.primary{flex:1.7;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1305;font-weight:500;border-color:var(--gold)}
 #spinToast{position:fixed;top:174px;left:50%;transform:translateX(-50%);z-index:210;padding:7px 16px;border-radius:100px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;background:var(--glass-dark);border:1px solid var(--gold-border);color:var(--gold-light);opacity:0;pointer-events:none;transition:opacity .3s}
 #spinToast.show{opacity:1}
-#modeToggle{position:fixed;left:0;right:0;width:calc(100% - 12px);margin:0 6px;bottom:calc(164px + env(safe-area-inset-bottom,0px));z-index:170;display:flex;padding:3px;border-radius:100px;border:1px solid var(--gold-border);background:var(--glass-dark);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;pointer-events:none;transition:opacity .5s}
-#modeToggle button{flex:1;min-height:34px;padding:0 6px;border:0;border-radius:100px;background:transparent;color:rgba(245,240,232,.6);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .25s,color .25s}
+#modeToggle{position:fixed;left:50%;bottom:186px;transform:translateX(-50%);z-index:170;display:flex;padding:3px;border-radius:100px;border:1px solid var(--gold-border);background:var(--glass-dark);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;pointer-events:none;transition:opacity .5s}
+#modeToggle button{min-height:34px;padding:0 16px;border:0;border-radius:100px;background:transparent;color:rgba(245,240,232,.6);font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .25s,color .25s}
 #modeToggle button.on{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1305;font-weight:500}
 
 /* START BUTTON */
-#startBtn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:12px;padding:18px 40px;font-size:13px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#1a1305;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:1px solid var(--gold-light);border-radius:var(--radius-pill);box-shadow:0 0 0 4px rgba(201,168,76,.12),0 10px 30px rgba(201,168,76,.28);animation:startPulse 2.6s ease-in-out infinite;transition:transform .2s ease,box-shadow .2s ease}
+#startBtn{
+  position:relative;overflow:hidden;
+  display:inline-flex;align-items:center;gap:12px;
+  padding:18px 40px;
+  font-family:'Jost',sans-serif;font-size:13px;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:#1a1305;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  border:1px solid var(--gold-light);
+  border-radius:var(--radius-pill);
+  box-shadow:0 0 0 4px rgba(201,168,76,.12),0 10px 30px rgba(201,168,76,.28);
+  animation:startPulse 2.6s ease-in-out infinite;
+  transition:transform .2s ease,box-shadow .2s ease;
+}
 #startBtn::after{content:'→';font-size:16px;letter-spacing:0;transition:transform .25s ease}
-#startBtn::before{content:'';position:absolute;top:0;left:-70%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:startShine 3.4s ease-in-out infinite}
-#startBtn:active{transform:scale(.96);box-shadow:0 0 0 2px rgba(201,168,76,.25),0 4px 14px rgba(201,168,76,.3)}
+#startBtn::before{
+  content:'';position:absolute;top:0;left:-70%;width:50%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:skewX(-20deg);
+  animation:startShine 3.4s ease-in-out infinite;
+}
+#startBtn:active{
+  transform:scale(.96);
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  color:#1a1305;
+  box-shadow:0 0 0 2px rgba(201,168,76,.25),0 4px 14px rgba(201,168,76,.3);
+}
 #startBtn:active::after{transform:translateX(4px)}
 @keyframes startShine{0%{left:-70%}55%,100%{left:130%}}
-@keyframes startPulse{0%,100%{box-shadow:0 0 0 4px rgba(201,168,76,.12),0 10px 30px rgba(201,168,76,.28)}50%{box-shadow:0 0 0 9px rgba(201,168,76,.05),0 10px 38px rgba(201,168,76,.45)}}
+@keyframes startPulse{
+  0%,100%{box-shadow:0 0 0 4px rgba(201,168,76,.12),0 10px 30px rgba(201,168,76,.28)}
+  50%{box-shadow:0 0 0 9px rgba(201,168,76,.05),0 10px 38px rgba(201,168,76,.45)}
+}
+
+/* RESPONSIVE LAYOUT */
+#dishCarousel{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;max-width:100%!important;
+  justify-content:space-around;gap:4px;padding:10px 6px calc(10px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;border-left:0;border-right:0;border-bottom:0}
+.dish-thumb{flex:1 0 auto}
+#actionBar{left:0!important;right:0!important;transform:none!important;width:100%!important;max-width:100%!important;gap:6px;padding:0 6px;
+  bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}
+#modeToggle{left:0!important;right:0!important;transform:none!important;width:calc(100% - 12px);margin:0 6px;
+  bottom:calc(164px + env(safe-area-inset-bottom,0px))!important}
+#modeToggle button{flex:1;padding:0 6px}
 
 /* FALLBACK 3D VIEWER */
 #fallback{position:fixed;inset:0;z-index:1000;display:none;flex-direction:column;background:radial-gradient(ellipse at 50% 35%,#1b1610,#060504 70%)}
@@ -141,6 +197,7 @@ img.start-logo{width:140px;height:140px;object-fit:contain;margin-bottom:44px;fi
 </div>
 
 <img src="logo1.png" id="logo" alt="Logo">
+<div id="dishCounter"></div>
 
 <div id="swipeHint">
   <div class="swipe-arrow"><div class="swipe-arrow-icon"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div><span>Prev</span></div>
@@ -149,7 +206,15 @@ img.start-logo{width:140px;height:140px;object-fit:contain;margin-bottom:44px;fi
 <div id="swipeFlash"></div>
 <div id="swipeZone"></div>
 
+<!-- HUD (Hidden cleanly via CSS to prevent disrupting AR scene loop) -->
+<div id="hudCard"><div id="hudPill"><div id="hudName"></div></div><div class="tags" id="hudTags"></div><div id="festPill"></div></div>
+
 <div id="spinToast"></div>
+<div id="recPill">● REC <span id="recT"></span></div>
+<div id="shareSheet"></div>
+<button id="shareNow"></button>
+<button id="snapBtn" aria-label="Share"></button>
+<button id="soundBtn" aria-label="Sound on or off"></button>
 <div id="modeToggle"><button data-m="card" class="on">View on card</button><button data-m="table">View on table</button></div>
 <div id="actionBar">
   <a data-a="reserve" class="primary" target="_blank" rel="noopener">Reserve Table</a>
@@ -161,7 +226,7 @@ img.start-logo{width:140px;height:140px;object-fit:contain;margin-bottom:44px;fi
 <div id="dishCarousel"></div>
 <button id="fbLink">Can't scan? View in 3D</button>
 <div id="fallback">
-  <div id="fbTop"><div id="fbName"></div><div id="fbNote"></div><button id="fbRetry">Try camera again</button></div>
+  <div id="fbTop"><div id="fbName"></div><div class="tags" id="fbTags"></div><div id="fbNote"></div><button id="fbRetry">Try camera again</button></div>
   <model-viewer id="fbViewer" camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="28deg" shadow-intensity="1" exposure="1.05" interaction-prompt="none" ar ar-placement="floor" ar-scale="auto" loading="eager"></model-viewer>
   <button id="fbAR">View on table</button>
   <div id="fbBar"></div>
@@ -206,23 +271,38 @@ const CONFIG={
   exposure:1.05,
   envIntensity:0.4,
   shadowOpacity:0.38,
-  /* Reveal animation: 'bloom' (new: golden light-burst + spiral rise) | 'refined' (soft fade-in) | 'random' */
-  revealStyle:'bloom',
+  revealStyle:'rise',      /* NEW: dish rises up out of the card, bottom to top */
+  riseSeconds:1.8,         /* NEW: how long the rise takes (seconds) */
+  glints:false,
+  steam:false,
+  steamOpacity:0.4,
+  sound:false,
+  soundVolume:0.5,
+  statusOffer:'',
+  reelSeconds:10,
+  waReelSeconds:6,
+  hashtags:'#best_restaurant_ooty #ooty_tourism',
+  festivalShowDays:0,
+  festivals:[],
   preload:true,
   tableEngine:'scene-viewer',
   tableSize:0.24,
-  tableView:true
+  tableView:true,
+  photoFrame:true,
+  frameTitle:'OOTY',
+  frameSub:'The Nilgiris · Tamil Nadu',
+  instagram:'@yourrestaurant'
 };
 
 const dishes = [
-  { name:"Almond Crusted Crispy", folder:"almondcrustedcrispy", model:"almondcrustedcrispy.glb", thumb:"almondcrustedcrispy.png", usdz:"almondcrustedcrispy.usdz", scale:"2 2 2", rotation:"90 90 90" },
-  { name:"Cheesy Quiche",         folder:"cheesyquiche",         model:"cheesyquiche.glb",         thumb:"cheesyquiche.png",         usdz:"cheesyquiche.usdz",         scale:"2 2 2", rotation:"90 90 90" },
-  { name:"Crispy Vegetable",      folder:"crispyvegetable",      model:"crispyvegetable.glb",      thumb:"crispyvegetable.png",      usdz:"crispyvegetable.usdz",      scale:"2 2 2", rotation:"90 90 90" },
-  { name:"Karamiso Ramen",        folder:"KaramisoRamen",        model:"KaramisoRamen.glb",        thumb:"karamisoramen.png",        usdz:"KaramisoRamen.usdz",        scale:"4 4 4", rotation:"90 90 90" },
-  { name:"Shio Ramen",            folder:"ShioRamen",            model:"ShioRamen.glb",            thumb:"shioramen.png",            scale:"9 9 9", rotation:"90 90 90" },
-  { name:"Shoyu Ramen",           folder:"ShoyuRamen",           model:"ShoyuRamen.glb",           thumb:"shoyuramen.png",           scale:"9 9 9", rotation:"90 90 90" },
-  { name:"Tantanmen",             folder:"Tantanman",            model:"Tantanman.glb",            thumb:"tantanman.png",            scale:"1.5 1.5 1.5", rotation:"90 90 90" },
-  { name:"Mango Petal Tower",     folder:"mangopetaltower",      model:"mangopetaltower.glb",      thumb:"mangopetaltower.png",      scale:"1.5 1.5 1.5", rotation:"90 90 90" }
+  { name:"Almond Crusted Crispy", folder:"almondcrustedcrispy", model:"almondcrustedcrispy.glb", thumb:"almondcrustedcrispy.png", usdz:"almondcrustedcrispy.usdz", scale:"2 2 2", rotation:"90 90 90", tag:"Crunchy Delight", veg:true, spice:0 },
+  { name:"Cheesy Quiche",         folder:"cheesyquiche",         model:"cheesyquiche.glb",         thumb:"cheesyquiche.png",         usdz:"cheesyquiche.usdz",         scale:"2 2 2", rotation:"90 90 90", tag:"Baked Fresh",     veg:true, spice:0 },
+  { name:"Crispy Vegetable",      folder:"crispyvegetable",      model:"crispyvegetable.glb",      thumb:"crispyvegetable.png",      usdz:"crispyvegetable.usdz",      scale:"2 2 2", rotation:"90 90 90", tag:"Crispy & Fresh",  veg:true, spice:1 },
+  { name:"Karamiso Ramen",        folder:"KaramisoRamen",        model:"KaramisoRamen.glb",        thumb:"karamisoramen.png",        usdz:"KaramisoRamen.usdz",        scale:"4 4 4", rotation:"90 90 90", tag:"Chef's pick",    veg:false, spice:3 },
+  { name:"Shio Ramen",            folder:"ShioRamen",            model:"ShioRamen.glb",            thumb:"shioramen.png",            scale:"9 9 9", rotation:"90 90 90", tag:"Light & clean",   veg:false, spice:1 },
+  { name:"Shoyu Ramen",           folder:"ShoyuRamen",           model:"ShoyuRamen.glb",           thumb:"shoyuramen.png",           scale:"9 9 9", rotation:"90 90 90", tag:"Most ordered",    veg:false, spice:1 },
+  { name:"Tantanmen",             folder:"Tantanman",            model:"Tantanman.glb",            thumb:"tantanman.png",            scale:"1.5 1.5 1.5", rotation:"90 90 90", tag:"Bold & nutty", veg:false, spice:3 },
+  { name:"Mango Petal Tower",     folder:"mangopetaltower",      model:"mangopetaltower.glb",      thumb:"mangopetaltower.png",      scale:"1.5 1.5 1.5", rotation:"90 90 90", tag:"Dessert Special", veg:true, spice:0 }
 ];
 
 var tablePaused=false, prepT=null;
@@ -233,9 +313,10 @@ const modelEntity=$('#modelEntity'),
   carousel=$('#dishCarousel'), logo=$('#logo'), scanHint=$('#scanHint'), target=$('#target1'),
   arScene=$('#arScene'), startScreen=$('#startScreen'), loadingOverlay=$('#loadingOverlay'),
   loadingStatus=$('#loadingStatus'), errorOverlay=$('#errorOverlay'), modelLoader=$('#modelLoader'),
-  swipeZone=$('#swipeZone'), swipeHint=$('#swipeHint'), swipeFlash=$('#swipeFlash');
+  swipeZone=$('#swipeZone'), swipeHint=$('#swipeHint'), swipeFlash=$('#swipeFlash'), dishCounter=$('#dishCounter'),
+  hudCard=$('#hudCard');
 
-const alwaysVisible=[carousel,logo,$('#actionBar'),$('#modeToggle')];
+const alwaysVisible=[carousel,logo,dishCounter,$('#actionBar'),$('#modeToggle')];
 
 /* carousel setup */
 dishes.forEach((dish,i)=>{
@@ -244,6 +325,9 @@ dishes.forEach((dish,i)=>{
   t.innerHTML=`<div class="thumb-img-wrap"><img src="3d-model/${dish.folder}/${dish.thumb}" onerror="this.style.visibility='hidden'" alt="${dish.name}" draggable="false"></div><span>${dish.name}</span>`;
   t.addEventListener('click',()=>selectDish(i));
   carousel.appendChild(t);
+  const d=document.createElement('div');
+  d.className='counter-dot'+(i===0?' active':'');
+  dishCounter.appendChild(d);
 });
 
 function applyModel(ent,dish,factor,src){
@@ -267,10 +351,12 @@ function selectDish(index){
   modelEntity.addEventListener('model-loaded',()=>{if(myTok!==loadTok)return; modelLoader.classList.remove('show');clearTimeout(modelTimeout)},{once:true});
   modelTimeout=setTimeout(()=>modelLoader.classList.remove('show'),25000);
 
-  clearTimeout(prepT); prepT=setTimeout(()=>prepTable(dish),1800);
+  if($('#hudName')) $('#hudName').textContent=dish.name;
+  curDish=dish; clearTimeout(prepT); prepT=setTimeout(()=>prepTable(dish),1800);
 
   document.querySelectorAll('.dish-thumb').forEach((el,i)=>el.classList.toggle('active',i===index));
   {const el=document.querySelectorAll('.dish-thumb')[index]; try{carousel.scrollTo({left:el.offsetLeft-carousel.clientWidth/2+el.clientWidth/2,behavior:'smooth'})}catch(e){carousel.scrollLeft=el.offsetLeft-carousel.clientWidth/2+el.clientWidth/2}}
+  document.querySelectorAll('.counter-dot').forEach((el,i)=>el.classList.toggle('active',i===index));
 }
 
 const d2r=d=>d*Math.PI/180;
@@ -298,7 +384,9 @@ function showSwipeHintOnce(){
 
 const waMsg=encodeURIComponent(`Hi ${CONFIG.name}! I saw your AR menu and I'd like to reserve a table.`);
 const LINKS={reserve:`https://wa.me/${CONFIG.whatsapp}?text=${waMsg}`,directions:CONFIG.mapsUrl,call:`tel:${CONFIG.phone}`};
-document.querySelectorAll('#actionBar a').forEach(a=>{a.href=LINKS[a.dataset.a]});
+document.querySelectorAll('#actionBar a').forEach(a=>{
+  a.href=LINKS[a.dataset.a];
+});
 
 /* auto-rotate */
 const spinner=$('#spinner'); let spinOn=CONFIG.spinDegPerSec>0, lastT=performance.now(), toastT=null, swayT=0, swayAng=0;
@@ -309,7 +397,7 @@ function toggleSpin(){
 }
 
 /* 3D Scene Effects */
-let renderReady=false, entryT=1, fxExt=0.5, shadowLight=null, lastSc=0;
+let renderReady=false, entryT=1, steamOrigin=new THREE.Vector3(), fxExt=0.5, shadowLight=null, lastSc=0, curDish=dishes[0];
 const T3=target.object3D;
 function softTex(stops){
   const c=document.createElement('canvas'); c.width=c.height=128; const x=c.getContext('2d');
@@ -321,31 +409,50 @@ const shadowPlane=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.ShadowMa
 shadowPlane.receiveShadow=true; shadowPlane.visible=false;
 const ring=new THREE.Mesh(new THREE.RingGeometry(.9,1,64),new THREE.MeshBasicMaterial({color:0xE8C97A,transparent:true,depthWrite:false,side:THREE.DoubleSide}));
 ring.visible=false;
+
+const wisps=[];
+const steam=[];
+const steamGroup=new THREE.Group();
+T3.add(shadowPlane,ring,steamGroup);
+
 const ring2=new THREE.Mesh(new THREE.RingGeometry(.93,1,64),new THREE.MeshBasicMaterial({color:0xfff0c0,transparent:true,depthWrite:false,side:THREE.DoubleSide}));
 ring2.visible=false;
-
-/* soft golden glow that blooms under the dish */
-const bloomGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:softTex([[0,'rgba(255,220,140,.95)'],[.4,'rgba(255,190,90,.4)'],[1,'rgba(255,170,60,0)']]),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0}));
-bloomGlow.visible=false;
-
-/* sparkles */
 const sparkTex=softTex([[0,'rgba(255,240,190,1)'],[.35,'rgba(232,201,122,.7)'],[1,'rgba(232,201,122,0)']]);
-const sparks=[]; for(let i=0;i<30;i++){
+const sparks=[]; for(let i=0;i<26;i++){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:sparkTex,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0}));
-  const a=Math.random()*6.283; sp.userData={dx:Math.cos(a),dy:Math.sin(a),sp:.5+Math.random()*.9,vz:.4+Math.random()*1.0,sz:.5+Math.random()*.9,delay:Math.random()*.25};
+  const a=Math.random()*6.283; sp.userData={dx:Math.cos(a),dy:Math.sin(a),sp:.5+Math.random()*.9,vz:.5+Math.random()*1.1,sz:.5+Math.random()*.9};
   sp.visible=false; sparks.push(sp);
 }
-const sparkGroup=new THREE.Group(); sparks.forEach(p=>sparkGroup.add(p));
-T3.add(shadowPlane,ring,ring2,bloomGlow,sparkGroup);
-const fxC=new THREE.Vector3(); let fxH=.3, curStyle='bloom', fadeMats=[];
+const sparkGroup=new THREE.Group(); sparks.forEach(p=>sparkGroup.add(p)); T3.add(ring2,sparkGroup);
+const fxC=new THREE.Vector3(); let fxH=.3, curStyle='refined', fadeMats=[];
+const beamC=document.createElement('canvas'); beamC.width=4; beamC.height=128;
+{const x=beamC.getContext('2d'), g=x.createLinearGradient(0,0,0,128); g.addColorStop(0,'rgba(255,240,190,0)'); g.addColorStop(.4,'rgba(255,224,150,.35)'); g.addColorStop(1,'rgba(255,214,120,1)'); x.fillStyle=g; x.fillRect(0,0,4,128)}
+const beam=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,1,32,1,true),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(beamC),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,opacity:0}));
+beam.rotation.x=Math.PI/2; beam.visible=false;
+const beamHolder=new THREE.Group(); beamHolder.add(beam); T3.add(beamHolder);
+const DOWN=new THREE.Vector3(0,0,-1), UP=new THREE.Vector3(0,0,1), clipPlane=new THREE.Plane(UP.clone(),1e9);
+
+const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:softTex([[0,'rgba(255,175,80,.95)'],[.45,'rgba(255,120,40,.38)'],[1,'rgba(255,100,30,0)']]),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:0}));
+glow.visible=false;
+const glints=[];
+const garnish=new THREE.Group(); garnish.visible=false;
+const glintGroup=new THREE.Group();
+T3.add(glow,glintGroup,garnish);
+
+const clocheMat=new THREE.MeshStandardMaterial({color:0xe6c47c,metalness:.85,roughness:.35,envMapIntensity:.9,side:THREE.DoubleSide,transparent:true});
+const clocheDome=new THREE.Mesh(new THREE.SphereGeometry(1,40,20,0,Math.PI*2,0,Math.PI/2),clocheMat); clocheDome.rotation.x=Math.PI/2;
+const clocheRim=new THREE.Mesh(new THREE.TorusGeometry(1,.035,12,56),clocheMat);
+const clocheKnob=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),clocheMat);
+const cloche=new THREE.Group(); cloche.add(clocheDome,clocheRim,clocheKnob); cloche.visible=false; T3.add(cloche);
+let fxClock=0;
 
 function setupRender(){
   if(renderReady||!arScene.renderer) return; renderReady=true;
   const r=arScene.renderer;
   try{r.setPixelRatio(Math.min(window.devicePixelRatio||1,2))}catch(e){}
   r.toneMapping=THREE.ACESFilmicToneMapping; r.toneMappingExposure=CONFIG.exposure;
-  r.shadowMap.enabled=CONFIG.shadowOpacity>0; r.shadowMap.type=THREE.PCFSoftShadowMap;
-
+  r.localClippingEnabled=true; r.shadowMap.enabled=CONFIG.shadowOpacity>0; r.shadowMap.type=THREE.PCFSoftShadowMap;
+  
   const es=new THREE.Scene(), g=new THREE.SphereGeometry(10,32,16), col=[], p=g.attributes.position;
   for(let i=0;i<p.count;i++){const t=p.getY(i)/10*.5+.5; const k=.10+.75*t*t; col.push(k*1.0,k*.88,k*.72)}
   g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
@@ -369,7 +476,7 @@ function onModelReady(){
   setupRender();
   const mesh=modelEntity.getObject3D('mesh'); if(!mesh) return;
   mesh.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;
-    [].concat(o.material).forEach(m=>{m.transparent=true; if(!fadeMats.includes(m))fadeMats.push(m); if(m.isMeshStandardMaterial){m.envMapIntensity=CONFIG.envIntensity;
+    [].concat(o.material).forEach(m=>{m.clippingPlanes=[clipPlane]; m.transparent=true; if(!fadeMats.includes(m))fadeMats.push(m); if(m.isMeshStandardMaterial){m.envMapIntensity=CONFIG.envIntensity;
       if(m.map&&m.map.anisotropy!==undefined)m.map.anisotropy=4;m.needsUpdate=true}})}});
   fadeMats=fadeMats.filter(m=>m.opacity!==undefined); spinner.object3D.scale.setScalar(1); spinner.object3D.updateMatrixWorld(true);
   const b=localBox(mesh), sz=b.getSize(new THREE.Vector3()), c=b.getCenter(new THREE.Vector3());
@@ -377,70 +484,81 @@ function onModelReady(){
   blob.position.set(c.x,c.y,zf-.002*fxExt); blob.scale.set(fxExt*1.7,fxExt*1.7,1);
   shadowPlane.position.set(c.x,c.y,zf-.001*fxExt); shadowPlane.scale.set(fxExt*4,fxExt*4,1);
   ring.position.set(c.x,c.y,zf+.002*fxExt);
-  fxC.set(c.x,c.y,zf); fxH=sz.z||.3;
+  steamOrigin.set(c.x,c.y,zf+sz.z*.55); fxC.set(c.x,c.y,zf); fxH=sz.z||.3;
   if(shadowLight){shadowLight.position.set(c.x+fxExt*.7,c.y-fxExt*.9,zf+fxExt*2.4); shadowLight.target.position.set(c.x,c.y,zf); lastSc=0}
   shadowPlane.visible=true;
   playEntry();
 }
 modelEntity.addEventListener('model-loaded',onModelReady);
-
-let ENTRY_DUR=1.4; const BLOB_OP=CONFIG.shadowOpacity/.38; let revealAng=0;
+let ENTRY_DUR=1.7; const BLOB_OP=CONFIG.shadowOpacity/.38; let revealAng=0;
 const clamp01=v=>Math.max(0,Math.min(1,v)), easeOutCubic=t=>1-Math.pow(1-t,3);
-const easeOutBack=t=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
-const easeOutElastic=t=>t===0?0:t===1?1:Math.pow(2,-9*t)*Math.sin((t*10-.75)*(2*Math.PI/3))+1;
+const easeOutBounce=t=>{const n=7.5625,d=2.75; if(t<1/d)return n*t*t; if(t<2/d)return n*(t-=1.5/d)*t+.75; if(t<2.5/d)return n*(t-=2.25/d)*t+.9375; return n*(t-=2.625/d)*t+.984375};
 
 function playEntry(){
   shadowPlane.material.opacity=0; spinner.object3D.rotation[CONFIG.spinAxis]-=revealAng; revealAng=0;
-  curStyle=CONFIG.revealStyle==='random'?['bloom','refined'][Math.floor(Math.random()*2)]:CONFIG.revealStyle;
-  ENTRY_DUR=curStyle==='bloom'?2.0:1.4; entryT=0;
-  fadeMats.forEach(m=>m.opacity=0); spinner.object3D.scale.setScalar(.001);
+  curStyle=CONFIG.revealStyle==='random'?['drop','emerge','orbit','scan','jelly','tempt','cloche','serve','sizzle','toss','whirl','splash','flambe','rise'][Math.floor(Math.random()*14)]:CONFIG.revealStyle;
+  ENTRY_DUR=curStyle==='rise'?(CONFIG.riseSeconds||1.8):1.4; entryT=0;
+  fadeMats.forEach(m=>m.opacity=['refined','tempt','serve','sizzle','toss','whirl','splash','flambe'].includes(curStyle)?0:1);
+  spinner.object3D.scale.setScalar(curStyle==='rise'?1:.001);
+  if(curStyle==='rise'){
+    /* start fully hidden below the card surface, then clip at the card plane while rising */
+    spinner.object3D.position.set(0,0,-(fxH+fxExt*.05));
+    clipPlane.set(UP,-fxC.z).applyMatrix4(T3.matrixWorld);
+  }
 }
+const easeOutBack=t=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const easeOutBackSoft=t=>{const c1=.9,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const orbPos=p=>{const R=fxExt*1.15*Math.pow(1-p,1.6), th=Math.PI+p*Math.PI*4.2; return [R*Math.cos(th),R*Math.sin(th),fxExt*.9*Math.pow(1-p,1.4)]};
 
 function fxUpdate(dt){
   if(entryT<1){
-    entryT=Math.min(1,entryT+dt/ENTRY_DUR); const t=entryT, so=spinner.object3D, st=curStyle;
-    let ground=1, ang=0, r1=0, r2=0, fade=1, glowO=0, glowS=0, sp=0;
-    if(st==='bloom'){
-      /* 1) golden glow swells on the card  2) dish blooms up with an elastic pop + spiral spin
-         3) two light rings shoot outward  4) sparkles burst upward and fade */
-      fade=easeOutCubic(clamp01((t-.12)/.4));
-      const grow=Math.max(easeOutElastic(clamp01((t-.12)/.7)),.001);
-      so.scale.setScalar(grow);
-      so.position.set(0,0,fxExt*.35*Math.pow(1-easeOutCubic(clamp01((t-.12)/.75)),1.5));
-      ang=(1-easeOutCubic(clamp01((t-.1)/.9)))*Math.PI*2.6;
-      ground=easeOutCubic(clamp01((t-.15)/.6));
-      r1=clamp01((t-.18)/.5); r2=clamp01((t-.3)/.5);
-      glowO=Math.sin(clamp01(t/.85)*Math.PI)*.85; glowS=fxExt*(1.2+1.2*easeOutCubic(clamp01(t/.8)));
-      sp=clamp01((t-.2)/.7);
-    }else{
+    entryT=Math.min(1,entryT+dt/ENTRY_DUR); const t=entryT, so=spinner.object3D, st=curStyle, N=sparks.length;
+    let ground=1, ang=0, r1=0, r2=0, sb0=.42, bo=0, p=0, scanZ=0;
+    let fade=1; if(st!=='cloche') cloche.visible=false;
+    const sparkCol=st==='flambe'?0xff8a2a:0xffffff; sparks.forEach(sp=>sp.material.color.setHex(sparkCol));
+    if(st==='rise'){
+      /* Dish pops up out of the target: bottom -> top, soft overshoot, gentle settling twist */
+      const l=easeOutBackSoft(clamp01(t/.85));
+      so.scale.setScalar(1);
+      so.position.set(0,0,-(1-l)*(fxH+fxExt*.05));
+      ang=(1-easeOutCubic(t))*Math.PI*.5;
+      ground=clamp01(t/.5);
+      r1=clamp01(t/.55); r2=clamp01((t-.12)/.55);
+      bo=t<.1?t/.1:Math.max(0,1-(t-.1)/.5);
+      /* keep clip plane glued to the card surface even if the card moves */
+      clipPlane.set(UP,-fxC.z).applyMatrix4(T3.matrixWorld);
+    }else if(st==='refined'){
       fade=easeOutCubic(clamp01(t/.6));
       so.scale.setScalar(.94+.06*easeOutCubic(t)); so.position.set(0,0,fxExt*.07*(1-easeOutCubic(t)));
-      ang=(1-easeOutCubic(t))*Math.PI*.35; ground=easeOutCubic(clamp01(t/.85));
+      ang=(1-easeOutCubic(t))*Math.PI*.35; ground=easeOutCubic(clamp01(t/.85)); sb0=99;
+    }else if(st==='drop'){
+      const l=clamp01(t/.62);
+      so.scale.setScalar(Math.max(easeOutBack(clamp01(t/.5)),.001)); so.position.set(0,0,fxExt*.9*(1-easeOutBounce(l)));
+      ang=(1-easeOutCubic(t))*Math.PI*1.5; ground=1-so.position.z/(fxExt*.9||1);
+      r1=clamp01((t-.4)/.6); r2=clamp01((t-.52)/.48); sb0=.42;
+    }else if(st==='emerge'){
+      const l=clamp01(t/.72);
+      so.scale.setScalar(1); so.position.set(0,0,-(1-easeOutBack(l))*(fxH+fxExt*.05));
+      ang=(1-easeOutCubic(t))*Math.PI*.9; ground=l;
+      r1=clamp01(t/.55); r2=clamp01((t-.15)/.55); sb0=.1;
+      bo=t<.12?t/.12:Math.max(0,1-(t-.12)/.55);
+      clipPlane.set(UP,-fxC.z).applyMatrix4(T3.matrixWorld);
+    }else{
+      p=clamp01(t/.85); const q=orbPos(p);
+      so.scale.setScalar(Math.max(easeOutBack(clamp01(p*1.25)),.001)); so.position.set(q[0],q[1],q[2]);
+      ang=(1-easeOutCubic(t))*Math.PI*3; ground=p; r1=clamp01((t-.8)/.2);
     }
     so.rotation[CONFIG.spinAxis]+=ang-revealAng; revealAng=ang;
     fadeMats.forEach(m=>m.opacity=fade);
     shadowPlane.material.opacity=CONFIG.shadowOpacity*clamp01(fade)*clamp01(ground);
     blob.scale.set(fxExt*1.7*(.45+.55*ground),fxExt*1.7*(.45+.55*ground),1); blob.material.opacity=BLOB_OP*clamp01(ground);
-
     ring.visible=r1>0&&r1<1; ring.scale.setScalar(fxExt*(.45+r1*1.5)); ring.material.opacity=(1-r1)*.85;
     ring2.visible=r2>0&&r2<1; ring2.position.copy(ring.position); ring2.scale.setScalar(fxExt*(.4+r2*1.9)); ring2.material.opacity=(1-r2)*.55;
+    beam.visible=bo>0; beam.material.opacity=bo*.9; beamHolder.scale.set(fxExt*(1-.3*t),fxExt*(1-.3*t),fxExt*2.4); beamHolder.position.set(fxC.x,fxC.y,fxC.z+fxExt*1.2);
 
-    bloomGlow.visible=glowO>0.01; bloomGlow.material.opacity=glowO; bloomGlow.position.set(fxC.x,fxC.y,fxC.z+fxExt*.05); bloomGlow.scale.set(glowS,glowS,1);
-
-    sparks.forEach(s=>{
-      const u=s.userData, p=clamp01((sp-u.delay)/(1-u.delay)); s.visible=p>0&&p<1;
-      if(!s.visible) return;
-      const rr=fxExt*(.2+u.sp*.9)*easeOutCubic(p);
-      s.position.set(fxC.x+u.dx*rr,fxC.y+u.dy*rr,fxC.z+fxExt*.1+u.vz*fxExt*.9*easeOutCubic(p));
-      s.material.opacity=Math.sin(p*Math.PI); s.scale.setScalar(fxExt*.13*u.sz*(1-p*.4));
-    });
-
-    if(entryT>=1){
-      fadeMats.forEach(m=>m.opacity=1); shadowPlane.material.opacity=CONFIG.shadowOpacity; so.scale.setScalar(1); so.position.set(0,0,0);
-      so.rotation[CONFIG.spinAxis]-=revealAng; revealAng=0;
-      blob.scale.set(fxExt*1.7,fxExt*1.7,1); blob.material.opacity=BLOB_OP;
-      ring.visible=ring2.visible=bloomGlow.visible=false; sparks.forEach(s=>s.visible=false);
-    }
+    if(entryT>=1){fadeMats.forEach(m=>m.opacity=1); shadowPlane.material.opacity=CONFIG.shadowOpacity; so.scale.setScalar(1); so.position.set(0,0,0); so.rotation[CONFIG.spinAxis]-=revealAng; revealAng=0;
+      blob.scale.set(fxExt*1.7,fxExt*1.7,1); blob.material.opacity=BLOB_OP; ring.visible=ring2.visible=beam.visible=false;
+      sparks.forEach(p=>{p.visible=false;p.material.color.setHex(0xffffff)}); cloche.visible=false; clipPlane.set(UP,1e9)}
   }
   const sc=T3.matrixWorld.getMaxScaleOnAxis();
   if(shadowLight&&sc>0&&Math.abs(sc-lastSc)>.01*sc){
@@ -602,7 +720,7 @@ function fbSelect(i){
 function openFallback(reason){
   if(fbOpen) return; fbOpen=true; clearTimeout(fbLinkT);
   try{pauseAR(); const m=mindar(); if(m) Promise.resolve(m.stop()).catch(()=>{})}catch(e){}
-  ['#arScene','#startScreen','#loadingOverlay','#errorOverlay','#actionBar','#modeToggle','#dishCarousel','#logo','#scanHint','#swipeZone','#swipeHint','#modelLoader','#fbLink'].forEach(q=>{const el=document.querySelector(q); if(el) el.style.display='none'});
+  ['#arScene','#startScreen','#loadingOverlay','#errorOverlay','#actionBar','#snapBtn','#modeToggle','#soundBtn','#dishCarousel','#logo','#hudCard','#scanHint','#swipeZone','#swipeHint','#modelLoader','#fbLink'].forEach(q=>{const el=document.querySelector(q); if(el) el.style.display='none'});
   $('#fbNote').textContent=reason==='denied'?'The camera is off, so here is the 3D view. Allow the camera to see dishes on the menu card.'
     :reason==='manual'?'Turn each dish around with your finger.':'AR is not available on this phone, but you can still explore every dish in 3D.';
   fb.classList.add('show'); fbSelect(currentIndex>=0?currentIndex:0);
