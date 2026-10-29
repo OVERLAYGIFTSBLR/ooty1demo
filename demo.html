@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aurelia – Dish Reveal Styles Prototype</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:rgba(201,168,76,.16);--gold-border:rgba(201,168,76,.3);--cream:#F5F0E8;--glass:rgba(10,8,6,.72)}
+html,body{background:#060504;color:var(--cream);font-family:'Jost',sans-serif;-webkit-text-size-adjust:100%}
+body{min-height:100vh;padding:0 0 40px}
+.wrap{max-width:980px;margin:0 auto;padding:0 14px}
+
+header{padding:calc(16px + env(safe-area-inset-top,0px)) 0 12px;text-align:center}
+.eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+header h1{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:30px;line-height:1.15;margin-top:6px}
+header h1 em{font-style:italic;color:var(--gold-light)}
+header p{font-size:12px;color:rgba(245,240,232,.45);margin-top:6px;font-weight:300}
+
+#stage{position:relative;width:100%;height:min(62vh,520px);min-height:340px;border-radius:18px;overflow:hidden;border:1px solid var(--gold-border);background:radial-gradient(ellipse at 50% 35%,#1d1711,#060504 72%)}
+#platform{position:absolute;left:50%;bottom:9%;width:56%;max-width:420px;height:26px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at center,rgba(201,168,76,.28),rgba(201,168,76,0) 70%);border:1px solid rgba(201,168,76,.14);z-index:1}
+#mv,#fallbackImg{position:absolute;inset:0;width:100%;height:100%;z-index:2;background:transparent;--poster-color:transparent;outline:none}
+#fallbackImg{display:none;object-fit:contain}
+#fx{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5}
+#badge{position:absolute;left:12px;top:12px;z-index:6;display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:100px;background:var(--glass);border:1px solid var(--gold-border);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light)}
+#badge i{width:9px;height:9px;border-radius:2px;border:1.5px solid #4caf50;position:relative}
+#badge i::after{content:'';position:absolute;inset:1.5px;border-radius:50%;background:#4caf50}
+#loader{position:absolute;inset:0;z-index:7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#060504;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,240,232,.45);transition:opacity .4s}
+#loader.hide{opacity:0;pointer-events:none}
+.ring{width:42px;height:42px;border:1px solid rgba(201,168,76,.18);border-top-color:var(--gold);border-radius:50%;animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#note{display:none;margin:10px 0 0;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,128,128,.4);background:rgba(255,128,128,.08);font-size:12px;line-height:1.6;color:#ffb3b3}
+#fbAR{position:absolute;right:12px;top:12px;z-index:6;display:none;min-height:36px;padding:0 16px;border-radius:100px;border:1px solid var(--gold-border);background:var(--glass);color:var(--gold-light);font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+
+.info{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 10px;flex-wrap:wrap}
+.info-l{min-width:0}
+#sCount{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+#sName{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;line-height:1.15;margin-top:2px}
+#sDesc{font-size:13px;color:rgba(245,240,232,.6);font-weight:300;margin-top:3px;line-height:1.5}
+#sBest{font-size:11px;color:var(--gold-light);margin-top:5px;letter-spacing:.04em}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap}
+button.b{font-family:'Jost',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:42px;padding:0 18px;border-radius:100px;border:1px solid var(--gold-border);background:var(--glass);color:var(--gold-light);font-size:11px;letter-spacing:.12em;text-transform:uppercase;transition:background .2s,color .2s}
+button.b:hover{background:var(--gold-dim)}
+button.b.pri{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:#1a1305;font-weight:500;border-color:var(--gold)}
+button.b.on{background:var(--gold);color:#1a1305}
+button.b.fav.on{background:#e04b6a;border-color:#e04b6a;color:#fff}
+
+#chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:6px}
+.chip{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 12px;border-radius:12px;border:1px solid rgba(201,168,76,.18);background:rgba(255,255,255,.03);color:rgba(245,240,232,.75);font-family:'Jost',sans-serif;font-size:12px;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.chip b{font-weight:500;color:var(--gold);min-width:20px}
+.chip.on{background:var(--gold-dim);border-color:var(--gold);color:var(--cream)}
+.chip .st{margin-left:auto;color:#e04b6a;font-size:13px;display:none}
+.chip.fv .st{display:inline}
+
+#short{margin-top:22px;padding:16px;border-radius:16px;border:1px solid var(--gold-border);background:rgba(255,255,255,.03)}
+#short h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400}
+#short p{font-size:12px;color:rgba(245,240,232,.5);margin:4px 0 10px;font-weight:300}
+#shortList{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:30px}
+.tag{padding:6px 12px;border-radius:100px;background:var(--gold-dim);border:1px solid var(--gold-border);font-size:12px;color:var(--gold-light)}
+.empty{font-size:12px;color:rgba(245,240,232,.35)}
+@media(max-width:520px){header h1{font-size:25px}#sName{font-size:24px}#stage{height:min(56vh,440px)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Aurelia · Japanese Kitchen</div>
+    <h1>Choose your <em>dish reveal</em></h1>
+    <p>Tap any style to watch the dish appear. Heart the ones you like to build a shortlist.</p>
+  </header>
+
+  <div id="stage">
+    <div id="platform"></div>
+    <model-viewer id="mv"
+      src="3d-model/almondcrustedcrispy/almondcrustedcrispy.glb"
+      ios-src="3d-model/almondcrustedcrispy/almondcrustedcrispy.usdz"
+      poster="3d-model/almondcrustedcrispy/almondcrustedcrispy.png"
+      alt="Almond Crusted Crispy"
+      camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="26deg"
+      camera-orbit="0deg 68deg auto" field-of-view="30deg"
+      shadow-intensity="1" shadow-softness="1" exposure="1.05"
+      interaction-prompt="none" loading="eager" reveal="auto"
+      ar ar-modes="scene-viewer webxr quick-look" ar-placement="floor" ar-scale="auto">
+    </model-viewer>
+    <img id="fallbackImg" src="3d-model/almondcrustedcrispy/almondcrustedcrispy.png" alt="Almond Crusted Crispy">
+    <div id="fx"></div>
+    <div id="badge"><i></i>Almond Crusted Crispy</div>
+    <button id="fbAR">View on table</button>
+    <div id="loader"><div class="ring"></div><span>Loading dish</span></div>
+  </div>
+  <div id="note"></div>
+
+  <div class="info">
+    <div class="info-l">
+      <div id="sCount"></div>
+      <div id="sName"></div>
+      <div id="sDesc"></div>
+      <div id="sBest"></div>
+    </div>
+    <div class="ctrls">
+      <button class="b" id="prev" aria-label="Previous style">← Prev</button>
+      <button class="b pri" id="replay">Replay</button>
+      <button class="b" id="next" aria-label="Next style">Next →</button>
+      <button class="b fav" id="fav">♡ Shortlist</button>
+      <button class="b" id="auto">▶ Auto-play all</button>
+    </div>
+  </div>
+
+  <div id="chips"></div>
+
+  <div id="short">
+    <h2>Client shortlist</h2>
+    <p>Styles you hearted appear here. Copy the list and send it to us.</p>
+    <div id="shortList"></div>
+    <div class="ctrls">
+      <button class="b pri" id="copy">Copy shortlist</button>
+      <button class="b" id="clear">Clear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═════ CONFIG ═════ */
+const AUTO_MS = 4800;          /* time per style in auto-play */
+const GOLD='#C9A84C', GOLD_L='#E8C97A', AMBER='#E8A23A', CREAM='#F3EAD2';
+
+/* ═════ ELEMENTS ═════ */
+const $=s=>document.querySelector(s);
+const stage=$('#stage'), mv=$('#mv'), fxL=$('#fx'), img=$('#fallbackImg'), loader=$('#loader'), noteEl=$('#note');
+let D=mv;                       /* the element that gets animated (model, or poster image if the model fails) */
+let loaded=false, pending=0, cur=0, tok=0, timers=[], anims=[], autoT=null, shownRandom='';
+
+/* ═════ HELPERS ═════ */
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const ctr=(w,h,x)=>`left:50%;top:50%;width:${w}px;height:${h}px;margin:${-h/2}px 0 0 ${-w/2}px;${x||''}`;
+function T(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id}
+function an(el,kf,o){const a=el.animate(kf,Object.assign({duration:1400,easing:'ease-out',fill:'both'},o||{}));anims.push(a);return a}
+function fx(css){const e=document.createElement('div');e.style.cssText='position:absolute;'+css;fxL.appendChild(e);return e}
+function reset(){
+  timers.forEach(clearTimeout); timers=[];
+  anims.forEach(a=>{try{a.cancel()}catch(e){}}); anims=[];
+  fxL.innerHTML='';
+  [mv,img].forEach(e=>e.getAnimations().forEach(a=>a.cancel()));
+}
+const hideUntil=(p,end)=>[{opacity:0},{opacity:0,offset:p},end||{opacity:1}];
+
+/* ═════ THE 25 REVEAL STYLES ═════ */
+const S=[
+/* 1 */{n:'Golden cloche lift',d:'A gold dome sits on the card, lifts away, and steam rises.',best:'Best for: chef\'s picks and premium mains',
+f(d,W,H,m){
+  const dw=m*.66,dh=m*.54, top=-dh*.55;
+  const dome=fx(`left:50%;top:50%;width:${dw}px;height:${dh}px;margin:${top}px 0 0 ${-dw/2}px;background:${GOLD};border:3px solid #8a6d22;border-radius:${dw/2}px ${dw/2}px 8px 8px;z-index:3`);
+  const knob=fx(ctr(24,24,`margin-top:${top-16}px;border-radius:50%;background:#8a6d22;z-index:3`));
+  const rim=fx(`left:50%;top:50%;width:${dw+34}px;height:10px;margin:${top+dh-4}px 0 0 ${-(dw+34)/2}px;background:#8a6d22;border-radius:6px;z-index:3`);
+  [dome,knob,rim].forEach(e=>an(e,[{transform:'translateY(0)',opacity:1},{transform:'translateY(0)',opacity:1,offset:.38},{transform:`translateY(${-m*.6}px)`,opacity:0}],{duration:2300,easing:'ease-in-out'}));
+  for(let i=0;i<7;i++){const s=fx(ctr(m*.12,m*.12,`margin-left:${-m*.2+i*m*.065}px;margin-top:${-m*.05}px;border-radius:50%;background:rgba(255,255,255,.3);filter:blur(6px)`));
+    an(s,[{transform:'translateY(0) scale(.5)',opacity:0},{opacity:.7,offset:.3},{transform:`translateY(${-m*.35}px) scale(1.7)`,opacity:0}],{duration:1700,delay:900+i*110})}
+}},
+/* 2 */{n:'Curtain part',d:'Two velvet panels slide apart to show the dish.',best:'Best for: opening reveal for the whole menu',
+f(d,W,H,m){
+  const st='top:0;height:100%;width:50.5%;background:#4d1620;z-index:3;';
+  const a=fx(st+`left:0;border-right:3px solid ${GOLD}`), b=fx(st+`right:0;border-left:3px solid ${GOLD}`);
+  an(a,[{transform:'translateX(0)'},{transform:'translateX(0)',offset:.3},{transform:'translateX(-101%)'}],{duration:1900,easing:'ease-in-out'});
+  an(b,[{transform:'translateX(0)'},{transform:'translateX(0)',offset:.3},{transform:'translateX(101%)'}],{duration:1900,easing:'ease-in-out'});
+  an(d,hideUntil(.3),{duration:1900,easing:'linear'});
+}},
+/* 3 */{n:'Spotlight pop',d:'The scene dims, a light beam lands, and the dish appears inside it.',best:'Best for: chef\'s picks and signature dishes',
+f(d,W,H,m){
+  const o=fx('inset:0;background:rgba(0,0,0,.78);z-index:3');
+  const c=fx('inset:0;background:rgba(255,236,170,.22);clip-path:polygon(43% 0,57% 0,76% 100%,24% 100%);z-index:3');
+  an(o,[{opacity:0},{opacity:1,offset:.22},{opacity:1,offset:.7},{opacity:0}],{duration:2400,easing:'linear'});
+  an(c,[{opacity:0},{opacity:0,offset:.15},{opacity:1,offset:.35},{opacity:1,offset:.7},{opacity:0}],{duration:2400,easing:'linear'});
+  an(d,[{opacity:0,transform:'scale(.9)'},{opacity:0,transform:'scale(.9)',offset:.3},{opacity:1,transform:'scale(1)'}],{duration:1400,delay:200,easing:'ease-out'});
+}},
+/* 4 */{n:'Plate slide-in',d:'The plate glides in from the side and brakes to a stop, like a waiter serving it.',best:'Best for: starters and mains',
+f(d,W,H,m){
+  an(d,[{transform:`translateX(${W*.75}px) rotate(10deg)`,opacity:0},{transform:'translateX(-14px) rotate(-2deg)',opacity:1,offset:.78},{transform:'translateX(0) rotate(0)',opacity:1}],{duration:1500,easing:'cubic-bezier(.2,.8,.3,1)'});
+}},
+/* 5 */{n:'Waiter drop-off',d:'The dish is lowered from above and set down with a soft bounce.',best:'Best for: all dishes, a safe and friendly choice',
+f(d,W,H,m){
+  const sh=fx(ctr(m*.5,22,`margin-top:${m*.32}px;border-radius:50%;background:rgba(0,0,0,.55);filter:blur(5px)`));
+  an(sh,[{transform:'scale(.2)',opacity:0},{transform:'scale(1)',opacity:.8}],{duration:1400});
+  an(d,[{transform:`translateY(${-m*.5}px) scale(1.2)`,opacity:0},{transform:'translateY(8px) scale(1)',opacity:1,offset:.68},{transform:'translateY(-6px)',offset:.84},{transform:'translateY(0)'}],{duration:1500,easing:'ease-in-out'});
+}},
+/* 6 */{n:'Ring pulse bloom',d:'Gold rings ripple out from the centre and the dish grows from the middle.',best:'Best for: all dishes, elegant and clean',
+f(d,W,H,m){
+  for(let i=0;i<3;i++){const r=fx(ctr(m*.4,m*.4,`border-radius:50%;border:2px solid ${GOLD_L}`));an(r,[{transform:'scale(.3)',opacity:.95},{transform:'scale(2.8)',opacity:0}],{duration:1400,delay:i*260})}
+  an(d,[{transform:'scale(0)',opacity:0},{transform:'scale(1.1)',opacity:1,offset:.72},{transform:'scale(1)',opacity:1}],{duration:1000,delay:380});
+}},
+/* 7 */{n:'Sparkle burst',d:'Gold sparks explode outward and the dish materialises in the middle.',best:'Best for: crispy starters',
+f(d,W,H,m){
+  for(let i=0;i<30;i++){const a=i/30*6.283+rnd(-.1,.1),r=rnd(m*.3,m*.65),s=fx(ctr(rnd(5,10),rnd(5,10),`border-radius:50%;background:${i%3?GOLD_L:'#fff'}`));
+    an(s,[{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px) scale(.2)`,opacity:0}],{duration:1200,delay:300})}
+  an(d,[{transform:'scale(.2)',opacity:0},{transform:'scale(1)',opacity:1}],{duration:800,delay:300,easing:'cubic-bezier(.2,1.4,.4,1)'});
+}},
+/* 8 */{n:'Gold dust assemble',d:'Hundreds of gold particles fly in and form the dish.',best:'Best for: desserts and special dishes',
+f(d,W,H,m){
+  for(let i=0;i<70;i++){const a=rnd(0,6.283),r=Math.max(W,H)*rnd(.45,.7),tx=rnd(-m*.28,m*.28),ty=rnd(-m*.22,m*.22),s=fx(ctr(6,6,`border-radius:50%;background:${i%2?GOLD:GOLD_L}`));
+    an(s,[{transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px)`,opacity:0},{opacity:1,offset:.2},{transform:`translate(${tx}px,${ty}px)`,opacity:1,offset:.78},{transform:`translate(${tx}px,${ty}px) scale(2)`,opacity:0}],{duration:1700,delay:rnd(0,350),easing:'ease-in'})}
+  an(d,[{opacity:0,transform:'scale(.85)'},{opacity:1,transform:'scale(1)'}],{duration:800,delay:1250});
+}},
+/* 9 */{n:'Ink reveal',d:'A circle spreads outward like ink on paper and uncovers the dish.',best:'Best for: Japanese-style dishes',
+f(d,W,H,m){
+  const r=fx(ctr(m*.3,m*.3,`border-radius:50%;background:${GOLD};`));
+  an(r,[{transform:'scale(0)',opacity:.45},{transform:'scale(5)',opacity:0}],{duration:1500});
+  const r2=fx(ctr(m*.3,m*.3,`border-radius:50%;border:2px solid ${GOLD_L}`));
+  an(r2,[{transform:'scale(0)',opacity:1},{transform:'scale(4.2)',opacity:0}],{duration:1500});
+  an(d,[{clipPath:'circle(0% at 50% 50%)'},{clipPath:'circle(75% at 50% 50%)'}],{duration:1500,easing:'ease-out'});
+}},
+/* 10 */{n:'Wipe scan',d:'A glowing scan line sweeps bottom to top and the dish appears behind it.',best:'Best for: modern, tech-feel menus',
+f(d,W,H,m){
+  const l=fx(ctr(m*.95,3,`background:${GOLD_L};box-shadow:0 0 14px 3px ${GOLD};z-index:4`));
+  an(l,[{transform:`translateY(${H*.4}px)`,opacity:1},{transform:`translateY(${-H*.4}px)`,opacity:1,offset:.96},{opacity:0,transform:`translateY(${-H*.4}px)`}],{duration:1700,easing:'linear'});
+  an(d,[{clipPath:'inset(100% 0 0 0)'},{clipPath:'inset(0 0 0 0)'}],{duration:1700,easing:'linear'});
+}},
+/* 11 */{n:'Hologram flicker',d:'The dish blinks in and out with a teal glitch before it turns solid.',best:'Best for: AR wow factor',
+f(d,W,H,m){
+  const sc=fx('inset:0;background:repeating-linear-gradient(0deg,rgba(93,202,165,.18) 0 2px,transparent 2px 5px);z-index:4');
+  an(sc,[{opacity:1},{opacity:1,offset:.7},{opacity:0}],{duration:1700,easing:'linear'});
+  an(d,[{opacity:0,filter:'hue-rotate(150deg) brightness(1.8)'},{opacity:.85,offset:.1,filter:'hue-rotate(150deg) brightness(1.8)'},{opacity:0,offset:.2},{opacity:.6,offset:.3,transform:'translateX(8px)',filter:'hue-rotate(150deg) brightness(1.6)'},{opacity:.1,offset:.45},{opacity:.95,offset:.6,transform:'translateX(-6px)',filter:'hue-rotate(80deg)'},{opacity:.3,offset:.72},{opacity:1,transform:'translateX(0)',filter:'hue-rotate(0deg) brightness(1)'}],{duration:1700,easing:'linear'});
+}},
+/* 12 */{n:'Spin zoom',d:'Starts tiny and spinning fast, then grows and slows to a stop.',best:'Best for: noodles and ramen',
+f(d,W,H,m){
+  an(d,[{transform:'scale(.04) rotate(0deg)',opacity:0},{transform:'scale(1) rotate(720deg)',opacity:1}],{duration:1600,easing:'cubic-bezier(.2,.8,.3,1)'});
+}},
+/* 13 */{n:'Ingredient fly-in',d:'Herbs, spices and toppings fly in from every side, then the dish lands.',best:'Best for: dishes with fresh toppings',
+f(d,W,H,m){
+  const cols=['#6aa84f','#d9534f','#f5e6b8','#E8A23A','#8fbf5a','#c98b4c'];
+  for(let i=0;i<26;i++){const a=rnd(0,6.283),r=Math.max(W,H)*.7,tx=rnd(-m*.2,m*.2),ty=rnd(-m*.15,m*.15),w=rnd(10,22),s=fx(ctr(w,w*rnd(.5,1),`border-radius:50%;background:${cols[i%cols.length]}`));
+    an(s,[{transform:`translate(${Math.cos(a)*r}px,${Math.sin(a)*r}px) rotate(0deg)`,opacity:1},{transform:`translate(${tx}px,${ty}px) rotate(${rnd(-540,540)}deg)`,opacity:1,offset:.7},{transform:`translate(${tx}px,${ty}px) scale(.3)`,opacity:0}],{duration:1500,delay:rnd(0,300),easing:'cubic-bezier(.3,.7,.3,1)'})}
+  an(d,[{opacity:0,transform:'scale(.7)'},{opacity:1,transform:'scale(1.06)',offset:.7},{opacity:1,transform:'scale(1)'}],{duration:1000,delay:950,easing:'ease-out'});
+}},
+/* 14 */{n:'Layer by layer',d:'The dish builds from the bottom up in four stacked layers.',best:'Best for: stacked or layered dishes and desserts',
+f(d,W,H,m){
+  const ln=fx(ctr(m*.95,3,`background:${GOLD_L};box-shadow:0 0 12px 2px ${GOLD};z-index:4`));
+  const y=[.38,.2,.02,-.18,-.4];
+  an(ln,[{transform:`translateY(${H*y[0]}px)`,opacity:1},{transform:`translateY(${H*y[1]}px)`,offset:.25},{transform:`translateY(${H*y[2]}px)`,offset:.5},{transform:`translateY(${H*y[3]}px)`,offset:.75},{transform:`translateY(${H*y[4]}px)`,opacity:1,offset:.97},{opacity:0,transform:`translateY(${H*y[4]}px)`}],{duration:2000,easing:'steps(1,end)'});
+  an(d,[{clipPath:'inset(100% 0 0 0)'},{clipPath:'inset(75% 0 0 0)',offset:.25},{clipPath:'inset(50% 0 0 0)',offset:.5},{clipPath:'inset(25% 0 0 0)',offset:.75},{clipPath:'inset(0 0 0 0)'}],{duration:2000,easing:'cubic-bezier(.2,1.2,.4,1)'});
+}},
+/* 15 */{n:'Broth pour',d:'Golden liquid pours in and rises, then the dish settles into view.',best:'Best for: ramen and soups',
+f(d,W,H,m){
+  const st=fx(`left:50%;top:0;width:9px;height:${H*.5}px;margin-left:-4px;background:${AMBER};border-radius:5px;transform-origin:top;z-index:4`);
+  an(st,[{transform:'scaleY(0)',opacity:1},{transform:'scaleY(1)',opacity:1,offset:.25},{transform:'scaleY(1)',opacity:1,offset:.78},{transform:'scaleY(1)',opacity:0}],{duration:1900,easing:'linear'});
+  const lq=fx(ctr(m*.8,m*.6,`margin-top:${m*.08}px;border-radius:45% 45% 18% 18%;background:rgba(232,162,58,.4);transform-origin:bottom;z-index:4`));
+  an(lq,[{transform:'scaleY(0)',opacity:.9},{transform:'scaleY(1)',opacity:.9,offset:.7},{transform:'scaleY(1)',opacity:0}],{duration:1900,delay:300,easing:'ease-out'});
+  an(d,[{clipPath:'inset(100% 0 0 0)',opacity:.4},{clipPath:'inset(0 0 0 0)',opacity:1}],{duration:1300,delay:500,easing:'linear'});
+}},
+/* 16 */{n:'Steam veil',d:'Thick steam covers the card, then drifts away to show the dish.',best:'Best for: hot dishes and ramen',
+f(d,W,H,m){
+  for(let i=0;i<14;i++){const x=rnd(-m*.4,m*.4),y=rnd(-m*.2,m*.35),sz=m*rnd(.25,.4),s=fx(ctr(sz,sz,`margin-left:${x}px;margin-top:${y}px;border-radius:50%;background:rgba(255,255,255,.5);filter:blur(14px);z-index:4`));
+    an(s,[{opacity:0,transform:'translateY(0) scale(.8)'},{opacity:.95,offset:.25},{opacity:.9,offset:.5},{opacity:0,transform:`translateY(${-m*.35}px) scale(1.7)`}],{duration:2200,delay:i*50,easing:'ease-in-out'})}
+  an(d,[{opacity:0},{opacity:0,offset:.25},{opacity:1}],{duration:1500,delay:300,easing:'linear'});
+}},
+/* 17 */{n:'Fire flash',d:'A quick orange flambé flare lights the scene and the dish is revealed in the glow.',best:'Best for: grilled and chef\'s special dishes',
+f(d,W,H,m){
+  const o=fx('inset:0;background:#ff6a1a;z-index:4');an(o,[{opacity:0},{opacity:.6,offset:.18},{opacity:0}],{duration:1100,easing:'linear'});
+  const c=fx(ctr(m*.5,m*.5,`border-radius:50%;background:${AMBER};filter:blur(10px);z-index:4`));an(c,[{transform:'scale(.2)',opacity:1},{transform:'scale(3.4)',opacity:0}],{duration:1000});
+  for(let i=0;i<10;i++){const f=fx(ctr(m*.07,m*.12,`margin-left:${(i-4.5)*m*.075}px;margin-top:${m*.08}px;border-radius:50% 50% 50% 50%/65% 65% 35% 35%;background:${i%2?AMBER:'#D85A30'};z-index:4`));
+    an(f,[{transform:'translateY(30px) scale(.4)',opacity:0},{transform:`translateY(${-m*.1}px) scale(1.4)`,opacity:1,offset:.4},{transform:`translateY(${-m*.35}px) scale(.3)`,opacity:0}],{duration:1200,delay:i*55})}
+  an(d,[{opacity:0,filter:'brightness(3) saturate(1.6)'},{opacity:1,filter:'brightness(1) saturate(1)'}],{duration:1100,delay:450});
+}},
+/* 18 */{n:'Petal shower',d:'Flower petals drift down across the card as the dish fades in.',best:'Best for: desserts like the Mango Petal Tower',
+f(d,W,H,m){
+  const cols=['#f4a6c0','#fbd0de','#f08cab','#ffe3ea'];
+  for(let i=0;i<30;i++){const w=rnd(12,20),p=fx(`left:${rnd(2,96)}%;top:-30px;width:${w}px;height:${w*1.5}px;border-radius:50% 0 50% 0;background:${cols[i%4]};z-index:4`);
+    an(p,[{transform:'translate(0,0) rotate(0deg)',opacity:1},{transform:`translate(${rnd(-60,60)}px,${H+60}px) rotate(${rnd(200,600)}deg)`,opacity:.95}],{duration:rnd(2000,2900),delay:rnd(0,700),easing:'linear'})}
+  an(d,[{opacity:0},{opacity:1}],{duration:1200,delay:800});
+}},
+/* 19 */{n:'Page flip',d:'The menu card flips over like a book page and the dish stands up on the other side.',best:'Best for: menu-card style experience',
+f(d,W,H,m){
+  const p=fx(ctr(m*.9,m*.9,`background:${CREAM};border:2px solid ${GOLD};border-radius:10px;transform-origin:left center;backface-visibility:hidden;z-index:4;box-shadow:0 8px 30px rgba(0,0,0,.5)`));
+  an(p,[{transform:'perspective(1000px) rotateY(0deg)'},{transform:'perspective(1000px) rotateY(-172deg)'}],{duration:1300,easing:'ease-in-out'});
+  an(d,[{opacity:0,transform:'perspective(1000px) rotateY(-85deg)'},{opacity:0,transform:'perspective(1000px) rotateY(-85deg)',offset:.4},{opacity:1,transform:'perspective(1000px) rotateY(0deg)'}],{duration:1600,easing:'ease-out'});
+}},
+/* 20 */{n:'Unfold origami',d:'The dish unfolds from a flat folded shape into its full 3D form.',best:'Best for: Japanese-themed menus',
+f(d,W,H,m){
+  const l=fx(ctr(m*.9,2,`background:${GOLD_L};z-index:4`));an(l,[{opacity:1,transform:'scaleX(.4)'},{opacity:0,transform:'scaleX(1.3)'}],{duration:1500});
+  an(d,[{transform:'perspective(800px) rotateX(88deg) scale(.7)',opacity:0,clipPath:'polygon(50% 50%,50% 50%,50% 50%,50% 50%)'},{transform:'perspective(800px) rotateX(-14deg) scale(1)',opacity:1,clipPath:'polygon(0 0,100% 0,100% 100%,0 100%)',offset:.72},{transform:'perspective(800px) rotateX(0deg) scale(1)',opacity:1,clipPath:'polygon(0 0,100% 0,100% 100%,0 100%)'}],{duration:1600,easing:'ease-out'});
+}},
+/* 21 */{n:'Elastic jelly',d:'The dish pops up, squashes and stretches a few times, then settles.',best:'Best for: fun and playful dishes',
+f(d,W,H,m){
+  an(d,[{transform:'scale(0,0)'},{transform:'scale(1.25,.75)',offset:.28},{transform:'scale(.85,1.15)',offset:.48},{transform:'scale(1.08,.94)',offset:.68},{transform:'scale(.97,1.03)',offset:.84},{transform:'scale(1,1)'}],{duration:1500,easing:'ease-out'});
+}},
+/* 22 */{n:'Teleport beam',d:'A vertical light beam drops down and the dish materialises inside it.',best:'Best for: sci-fi AR feel',
+f(d,W,H,m){
+  const b=fx(`left:50%;top:0;width:${m*.62}px;height:100%;margin-left:${-m*.31}px;background:rgba(93,202,165,.32);border-left:2px solid #9fe1cb;border-right:2px solid #9fe1cb;z-index:4`);
+  an(b,[{opacity:0,transform:'scaleX(.15)'},{opacity:1,transform:'scaleX(1)',offset:.25},{opacity:1,transform:'scaleX(1)',offset:.75},{opacity:0,transform:'scaleX(.15)'}],{duration:2000,easing:'linear'});
+  an(d,[{clipPath:'inset(0 0 100% 0)',opacity:.4},{clipPath:'inset(0 0 0 0)',opacity:1}],{duration:1200,delay:400,easing:'linear'});
+}},
+/* 23 */{n:'Zoom from camera',d:'The dish starts huge near the screen and flies back onto the card.',best:'Best for: dramatic first impression',
+f(d,W,H,m){
+  an(d,[{transform:'scale(5)',opacity:0},{transform:'scale(2.4)',opacity:.7,offset:.3},{transform:'scale(1)',opacity:1}],{duration:1400,easing:'cubic-bezier(.2,.8,.3,1)'});
+}},
+/* 24 */{n:'Tilt and settle',d:'The dish arrives tilted and swings level, like a plate being placed.',best:'Best for: all dishes, natural feel',
+f(d,W,H,m){
+  an(d,[{transform:'rotate(-45deg) scale(.6)',opacity:0},{transform:'rotate(9deg) scale(1.05)',opacity:1,offset:.58},{transform:'rotate(-3deg) scale(1)',offset:.8},{transform:'rotate(0deg) scale(1)',opacity:1}],{duration:1500,easing:'ease-out'});
+}},
+/* 25 */{n:'Random surprise',d:'A different style is picked every time, so every scan feels new.',best:'Best for: repeat customers',
+f(d,W,H,m){
+  let k=Math.floor(Math.random()*24); if(k===lastRandom) k=(k+1)%24; lastRandom=k;
+  shownRandom=S[k].n; $('#sDesc').textContent='Picked this time: '+shownRandom+'. Tap Replay for another.';
+  S[k].f(d,W,H,m);
+}}
+];
+let lastRandom=-1;
+
+/* ═════ PLAYER ═════ */
+function play(i){
+  cur=((i%S.length)+S.length)%S.length;
+  tok++;
+  reset();
+  document.querySelectorAll('.chip').forEach((c,j)=>c.classList.toggle('on',j===cur));
+  const s=S[cur];
+  $('#sCount').textContent='Style '+(cur+1)+' of '+S.length;
+  $('#sName').textContent=s.n;
+  $('#sDesc').textContent=s.d;
+  $('#sBest').textContent=s.best;
+  syncFav();
+  const el=document.querySelector('.chip.on'); if(el&&el.scrollIntoView){try{el.scrollIntoView({block:'nearest',inline:'nearest'})}catch(e){}}
+  if(!loaded){pending=cur;return}
+  void stage.offsetWidth;
+  const W=stage.clientWidth,H=stage.clientHeight,m=Math.min(W,H);
+  s.f(D,W,H,m);
+}
+
+/* ═════ UI BUILD ═════ */
+const chips=$('#chips');
+S.forEach((s,i)=>{
+  const b=document.createElement('button'); b.className='chip'; b.innerHTML=`<b>${i+1}</b><span>${s.n}</span><span class="st">♥</span>`;
+  b.addEventListener('click',()=>{stopAuto();play(i)}); chips.appendChild(b);
+});
+$('#prev').addEventListener('click',()=>{stopAuto();play(cur-1)});
+$('#next').addEventListener('click',()=>{stopAuto();play(cur+1)});
+$('#replay').addEventListener('click',()=>play(cur));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){stopAuto();play(cur+1)}else if(e.key==='ArrowLeft'){stopAuto();play(cur-1)}});
+
+/* auto-play */
+const autoBtn=$('#auto');
+function stopAuto(){clearInterval(autoT);autoT=null;autoBtn.classList.remove('on');autoBtn.textContent='▶ Auto-play all'}
+autoBtn.addEventListener('click',()=>{
+  if(autoT){stopAuto();return}
+  autoBtn.classList.add('on'); autoBtn.textContent='■ Stop auto-play';
+  play(cur+1); autoT=setInterval(()=>play(cur+1),AUTO_MS);
+});
+
+/* shortlist */
+let favs=[]; try{favs=JSON.parse(localStorage.getItem('revealFavs')||'[]')}catch(e){}
+function saveFavs(){try{localStorage.setItem('revealFavs',JSON.stringify(favs))}catch(e){}}
+function syncFav(){
+  const f=favs.includes(cur), b=$('#fav'); b.classList.toggle('on',f); b.textContent=f?'♥ Shortlisted':'♡ Shortlist';
+  document.querySelectorAll('.chip').forEach((c,j)=>c.classList.toggle('fv',favs.includes(j)));
+  const list=$('#shortList'); list.innerHTML='';
+  if(!favs.length){list.innerHTML='<span class="empty">No styles shortlisted yet.</span>';return}
+  [...favs].sort((a,b)=>a-b).forEach(j=>{const t=document.createElement('span');t.className='tag';t.textContent=(j+1)+'. '+S[j].n;list.appendChild(t)});
+}
+$('#fav').addEventListener('click',()=>{const i=favs.indexOf(cur); if(i>=0) favs.splice(i,1); else favs.push(cur); saveFavs(); syncFav()});
+$('#clear').addEventListener('click',()=>{favs=[];saveFavs();syncFav()});
+$('#copy').addEventListener('click',()=>{
+  const txt='Aurelia reveal shortlist:\n'+(favs.length?[...favs].sort((a,b)=>a-b).map(j=>(j+1)+'. '+S[j].n).join('\n'):'(none)');
+  const b=$('#copy'),old=b.textContent;
+  const done=()=>{b.textContent='Copied';setTimeout(()=>b.textContent=old,1400)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(()=>{prompt('Copy your shortlist:',txt)})}
+  else prompt('Copy your shortlist:',txt);
+});
+
+/* ═════ MODEL EVENTS ═════ */
+const fbAR=$('#fbAR');
+function ready(){
+  if(loaded) return; loaded=true; loader.classList.add('hide');
+  play(pending);
+}
+mv.addEventListener('load',()=>{ fbAR.style.display=mv.canActivateAR?'block':'none'; ready() });
+mv.addEventListener('error',()=>{
+  D=img; mv.style.display='none'; img.style.display='block';
+  noteEl.style.display='block';
+  noteEl.innerHTML='The 3D model could not be loaded, so the dish photo is shown instead. Check that <b>3d-model/almondcrustedcrispy/almondcrustedcrispy.glb</b> is next to this file, and open the page through a web server (not by double-clicking the file).';
+  ready();
+});
+fbAR.addEventListener('click',()=>{try{mv.activateAR()}catch(e){}});
+setTimeout(()=>{ if(!loaded){ loader.classList.add('hide'); } },12000);
+
+syncFav();
+play(0);
+</script>
+</body>
+</html>
