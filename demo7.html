@@ -705,7 +705,7 @@ function play(i){
   cur=((i%META.length)+META.length)%META.length;
   syncUI();
   if(markerFound&&modelReady) startReveal(cur);
-  else if(arStarted) toast('Point the camera at the menu card');
+  else if(arStarted) toast('');
 }
 $('#bPrev').addEventListener('click',()=>{stopAuto();play(cur-1)});
 $('#bNext').addEventListener('click',()=>{stopAuto();play(cur+1)});
